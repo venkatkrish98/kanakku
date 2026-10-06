@@ -403,8 +403,17 @@ export class VoiceOrchestrator {
       };
 
       const result = await client.callTool('record_expense', args);
-      const token = (result._meta?.confirmation_token as string) || undefined;
-      const resourceUri = (result._meta?.['ui/resourceUri'] as string) || 'ui://cards/expense-draft';
+      let token = (result._meta?.confirmation_token as string) || undefined;
+      let resourceUri = (result._meta?.['ui/resourceUri'] as string) || 'ui://cards/expense-draft';
+      try {
+        if (result.content?.[0]?.text) {
+          const parsed = JSON.parse(result.content[0].text);
+          if (parsed.confirmation_token) token = parsed.confirmation_token;
+          if (parsed.ui_resource_uri) resourceUri = parsed.ui_resource_uri;
+        }
+      } catch {
+        // Fallback to _meta or defaults
+      }
       const rupees = (amountPaise / 100).toLocaleString('en-IN');
 
       return {
@@ -458,12 +467,12 @@ export class VoiceOrchestrator {
 
       const args = {
         customer_name: customerName,
-        place_of_supply: '33', // Tamil Nadu default
+        place_of_supply_state_code: '33', // Tamil Nadu default
         due_date: new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0]!,
         line_items: [
           {
             description: 'Professional Consulting Services',
-            hsn_sac: '998311',
+            hsn_sac_code: '998311',
             quantity: 1,
             unit_price_paise: unitPricePaise,
             gst_rate_bps: 1800,
@@ -472,9 +481,19 @@ export class VoiceOrchestrator {
       };
 
       const result = await client.callTool('create_invoice', args);
-      const token = (result._meta?.confirmation_token as string) || undefined;
-      const resourceUri = (result._meta?.['ui/resourceUri'] as string) || 'ui://cards/invoice-draft';
-      const totalPaise = (result._meta?.total_paise as number) || Math.round(unitPricePaise * 1.18);
+      let token = (result._meta?.confirmation_token as string) || undefined;
+      let resourceUri = (result._meta?.['ui/resourceUri'] as string) || 'ui://cards/invoice-draft';
+      let totalPaise = (result._meta?.total_paise as number) || Math.round(unitPricePaise * 1.18);
+      try {
+        if (result.content?.[0]?.text) {
+          const parsed = JSON.parse(result.content[0].text);
+          if (parsed.confirmation_token) token = parsed.confirmation_token;
+          if (parsed.ui_resource_uri) resourceUri = parsed.ui_resource_uri;
+          if (parsed.total_paise) totalPaise = parsed.total_paise;
+        }
+      } catch {
+        // Fallback to _meta or defaults
+      }
       const totalRupees = Math.round(totalPaise / 100).toLocaleString('en-IN');
       const subtotalRupees = Math.round(unitPricePaise / 100).toLocaleString('en-IN');
 

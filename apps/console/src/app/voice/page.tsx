@@ -455,7 +455,7 @@ export default function VoiceSimulatorPage() {
           maxWidth: '860px',
           width: '100%',
           margin: '0 auto',
-          padding: '1.5rem 1.5rem 18rem 1.5rem',
+          padding: '1.5rem 1.5rem 7.5rem 1.5rem',
           display: 'flex',
           flexDirection: 'column',
           gap: '1.25rem',
@@ -618,7 +618,7 @@ export default function VoiceSimulatorPage() {
         <div ref={messagesEndRef} />
       </main>
 
-      {/* Bottom Floating Control Dock */}
+      {/* Bottom Sleek Non-Intrusive Floating Control Dock */}
       <footer
         style={{
           position: 'fixed',
@@ -627,89 +627,97 @@ export default function VoiceSimulatorPage() {
           right: 0,
           background: 'linear-gradient(180deg, rgba(9, 13, 22, 0) 0%, rgba(9, 13, 22, 0.95) 40%, #090d16 100%)',
           backdropFilter: 'blur(16px)',
-          padding: '1rem 1.5rem 1.5rem 1.5rem',
+          padding: '0.5rem 1.5rem 0.85rem 1.5rem',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           zIndex: 50,
         }}
       >
-        <div style={{ maxWidth: '860px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          {/* Live Audio Waveform */}
-          <div style={{ marginBottom: '1rem' }}>
-            <WaveformVisualizer analyserNode={analyserNode} state={state} width={340} height={52} />
-          </div>
+        <div style={{ maxWidth: '820px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          {/* Active Audio Waveform (Visible only when speaking or listening) */}
+          {(state === 'listening' || state === 'speaking') && (
+            <div style={{ marginBottom: '0.4rem' }}>
+              <WaveformVisualizer analyserNode={analyserNode} state={state} width={260} height={28} />
+            </div>
+          )}
 
-          {/* Central Push-to-Talk Button */}
-          <div style={{ marginBottom: '1rem' }}>
+          {/* Unified Compact Action Bar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%' }}>
+            {/* Inline Compact Push-to-Talk Mic Button */}
             <PushToTalkButton
               state={state}
               onStart={startListening}
               onStop={stopListening}
               onToggle={toggleListening}
+              compact={true}
             />
-          </div>
 
-          {/* Text Input Fallback Bar */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (textInput.trim()) {
-                handleUserTurn(textInput);
-              }
-            }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              width: '100%',
-              maxWidth: '680px',
-              background: 'rgba(30, 41, 59, 0.7)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              borderRadius: '9999px',
-              padding: '0.4rem 0.5rem 0.4rem 1.25rem',
-              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
-            }}
-          >
-            <input
-              type="text"
-              value={textInput}
-              onChange={(e) => setTextInput(e.target.value)}
-              placeholder="Or type a command... (e.g. 'Record 2,400 for client dinner')"
-              disabled={state === 'processing'}
+            {/* Text Input Command Bar */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (textInput.trim()) {
+                  handleUserTurn(textInput);
+                }
+              }}
               style={{
                 flex: 1,
-                background: 'transparent',
-                border: 'none',
-                outline: 'none',
-                color: '#f8fafc',
-                fontSize: '0.9rem',
-              }}
-            />
-            <button
-              type="submit"
-              disabled={!textInput.trim() || state === 'processing'}
-              aria-label="Send command"
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                border: 'none',
-                background: textInput.trim() ? '#38bdf8' : 'rgba(255, 255, 255, 0.1)',
-                color: textInput.trim() ? '#090d16' : '#64748b',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                cursor: textInput.trim() ? 'pointer' : 'not-allowed',
-                transition: 'all 0.2s ease',
+                gap: '0.5rem',
+                background: 'rgba(30, 41, 59, 0.75)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '9999px',
+                padding: '0.35rem 0.5rem 0.35rem 1.1rem',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.35)',
               }}
             >
-              <Send size={16} />
-            </button>
-          </form>
+              <input
+                type="text"
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                placeholder="Speak via mic or type a command... (e.g. 'Record 2,400 for client dinner')"
+                disabled={state === 'processing'}
+                style={{
+                  flex: 1,
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  color: '#f8fafc',
+                  fontSize: '0.88rem',
+                }}
+              />
+              <button
+                type="submit"
+                disabled={!textInput.trim() || state === 'processing'}
+                aria-label="Send command"
+                style={{
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '50%',
+                  border: 'none',
+                  background: textInput.trim() ? '#38bdf8' : 'rgba(255, 255, 255, 0.1)',
+                  color: textInput.trim() ? '#090d16' : '#64748b',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: textInput.trim() ? 'pointer' : 'not-allowed',
+                  transition: 'all 0.2s ease',
+                  flexShrink: 0,
+                }}
+              >
+                <Send size={15} />
+              </button>
+            </form>
+          </div>
 
-          {/* Quick SMB Prompt Pills */}
-          <QuickPromptList onSelectPrompt={(prompt) => handleUserTurn(prompt)} disabled={state === 'processing'} />
+          {/* Quick SMB Prompt Pills (shown only at start so content is never blocked) */}
+          {messages.length <= 1 && (
+            <div style={{ marginTop: '0.5rem', width: '100%' }}>
+              <QuickPromptList onSelectPrompt={(prompt) => handleUserTurn(prompt)} disabled={state === 'processing'} />
+            </div>
+          )}
         </div>
       </footer>
 
