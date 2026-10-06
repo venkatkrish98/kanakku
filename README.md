@@ -64,6 +64,12 @@ Kanakku implements the new **MCP Apps (`ui://`) extension**. When the client neg
 - **Month-End Close Card**: Interactive reconciliation checklist displaying unjournaled transactions, GST set-off balances, and period lock warnings.
 - **Fallback Compatibility**: For voice-only clients (e.g. smart speakers), the server returns clean, concise spoken summaries.
 
+### 2.3. Alexa+ Track Alignment & Architecture Disclosure
+Per official Devpost guidance and FAQs, developer tooling for unreleased native Alexa+ is not accessible to hackathon participants. To strictly fulfill the **Alexa+ Track** requirements:
+- Kanakku implements a fully compliant, production-grade **Self-Hosted Model Context Protocol (MCP) Server** over Streamable HTTP (`/mcp`), ready to connect to any MCP-compliant agent host.
+- We pair this with an interactive **Alexa+ Experience Simulator** (`/voice`) in the Next.js console, featuring Indian English speech-to-text (`en-IN`), real-time audio waveform visualizers, Amazon Bedrock Converse multi-turn intent routing, and live rendering of interactive MCP App approval cards.
+- Kanakku does *not* claim native access to unreleased private Alexa+ developer toolkits; it demonstrates the exact agentic MCP architecture intended for next-generation Alexa+ agent workflows.
+
 ---
 
 ## 3. AWS Cloud Architecture (AWS Builder Mini Challenge)
@@ -158,6 +164,31 @@ pnpm --filter @kanakku/console dev
 - **Interactive Voice Simulator**: `http://localhost:3000/voice`
 - **Books Dashboard**: `http://localhost:3000/`
 
+### 4. Live MCP Streamable HTTP Demo via curl
+You can interact directly with the running MCP server over Streamable HTTP:
+
+```bash
+# 1. Initialize MCP Session
+curl -i -X POST http://localhost:3001/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"test-client","version":"1.0.0"}}}'
+
+# Note the 'mcp-session-id' returned in headers (e.g. <SESSION_ID>)
+
+# 2. List Available Financial Tools
+curl -X POST http://localhost:3001/mcp \
+  -H "Content-Type: application/json" \
+  -H "mcp-session-id: <SESSION_ID>" \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
+
+# 3. Call 'gst_liability' Tool
+curl -X POST http://localhost:3001/mcp \
+  -H "Content-Type: application/json" \
+  -H "mcp-session-id: <SESSION_ID>" \
+  -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"gst_liability","arguments":{"period":"2026-10"}}}'
+```
+
 ---
 
 ## 6. Testing & Quality Assurance
@@ -182,8 +213,15 @@ pnpm typecheck
 ## 7. Submission Artifacts
 
 - **Devpost Project Name**: Kanakku (கணக்கு) — Voice-First AI Bookkeeper for Indian MSMEs
-- **Pitch Video Script & Shot List**: [`docs/pitch-video-script.md`](file:///c:/kanakku/docs/pitch-video-script.md)
+- **Pitch Video Script & Shot List (2m 48s)**: [`docs/pitch-video-script.md`](file:///c:/kanakku/docs/pitch-video-script.md)
 - **Developer & Platform Feedback**: [`FEEDBACK.md`](file:///c:/kanakku/FEEDBACK.md)
 - **Friction Log**: [`FRICTION_LOG.md`](file:///c:/kanakku/FRICTION_LOG.md)
 - **AWS Infrastructure Blueprint**: [`docs/aws.md`](file:///c:/kanakku/docs/aws.md)
 - **Architecture Specification**: [`docs/architecture.md`](file:///c:/kanakku/docs/architecture.md)
+
+---
+
+## 8. License
+
+This project is licensed under the MIT License — see the [`LICENSE`](file:///c:/kanakku/LICENSE) file for details.
+
