@@ -56,7 +56,7 @@ This document contains authentic, empirical developer feedback and friction logg
 - **What worked well**:  
   - The Converse API (`ConverseCommand`) provides a unified multi-turn schema that eliminates provider-specific payload idiosyncrasies.
   - Exceptional accuracy extracting complex Indian financial terms (e.g., "5000 rupees plus 18% GST for catering", "inter-state IGST", "TDS deduction").
-  - Rapid multi-turn tool calling and conversational responses provided sub-second turn latency for voice interaction.
+  - Multi-turn tool calling performed reliably across our tested voice interaction flows, providing responsive dialog turns though response times vary based on payload complexity and network conditions.
 
 - **What needs improvement**:  
   - In `@aws-sdk/client-bedrock-runtime`, the TypeScript `Tool` union expects internal `$unknown` variants, requiring type casting (`as unknown as Tool[]`) when passing external tool schemas.
@@ -66,7 +66,7 @@ This document contains authentic, empirical developer feedback and friction logg
   - Model access for Anthropic Claude 3.5 Sonnet in `ap-south-1` was requested and approved in the AWS Console Model Access panel within 5 minutes. Once activated, configuring the Converse API with AWS SDK v3 took under 20 minutes to achieve working multi-turn voice dialog.
 
 - **Whether we would build with it again and why**:  
-  - **Yes.** Bedrock Converse is enterprise-ready, adheres to strict AWS data privacy terms (customer prompts and completions are never used to train AWS models and data remains within the designated region and IAM boundary), and provides rapid conversational response times for voice applications.
+  - **Yes.** Bedrock Converse is enterprise-ready and provides unified multi-turn schema support; per AWS documentation, customer prompts and completions are not used to train AWS foundation models. Teams can configure account-level logging, data retention policies, and regional inference boundaries to match specific compliance requirements.
 
 ---
 

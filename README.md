@@ -109,7 +109,7 @@ Per official Devpost guidance and FAQs, developer tooling for unreleased native 
 ```
 
 - **AWS App Runner**: Fully managed serverless container runtime hosting both the MCP Server and Next.js Web Console with zero server management, automatic SSL, and private VPC egress.
-- **Amazon Bedrock Converse API**: Orchestrates conversational multi-turn sessions using Anthropic Claude 3.5 Sonnet (`anthropic.claude-3-5-sonnet-20241022-v2:0`) with rapid turn latency and AWS enterprise security boundaries.
+- **Amazon Bedrock Converse API**: Orchestrates conversational multi-turn sessions using Anthropic Claude 3.5 Sonnet (`anthropic.claude-3-5-sonnet-20241022-v2:0`) with unified multi-turn tool calling and IAM-governed access.
 - **Amazon RDS for PostgreSQL 16**: Multi-AZ relational database providing ACID transaction guarantees, integer paise financial fields, and row-level locking (`FOR UPDATE SKIP LOCKED`) for background job workers.
 - **AWS Secrets Manager**: Stores and rotates runtime database credentials (`DATABASE_URL`), RDS master administrative credentials, and cryptographic audit signing keys (`AUDIT_ANCHOR_SECRET`).
 - **Amazon CloudWatch Logs**: Append-only operational audit sink receiving HMAC-SHA256 signed audit head hashes upon month close with 365-day retention.
