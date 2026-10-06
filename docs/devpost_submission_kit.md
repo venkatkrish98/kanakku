@@ -19,7 +19,9 @@ Use this copy-paste ready guide to submit **Kanakku** on the official Devpost po
 ---
 
 ### 2. Demo Video (Video Link)
-- **Local File to Upload:** Upload [`docs/kanakku_demo_video.mp4`](docs/kanakku_demo_video.mp4) (1m 45s with synchronized voiceover) to **YouTube** (Unlisted or Public) or **Vimeo**, and paste the URL.
+- **YouTube Video URL:**
+  `https://youtu.be/57xZQnxHf50`
+- **Duration:** 80 seconds (HD 720p with synchronized audio narration)
 
 ---
 

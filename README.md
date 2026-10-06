@@ -29,8 +29,9 @@ Kanakku bridges conversational simplicity with institutional financial rigor:
 ## 2. Demo Video & Walkthrough
 
 A complete high-definition walkthrough of Kanakku's voice copilot, self-hosted Model Context Protocol server, and double-entry ledger in action is available:
-- **Demo Video (MP4):** [`docs/kanakku_demo_video.mp4`](docs/kanakku_demo_video.mp4)
-- **Pitch Script & Shot List (2m 48s):** [`docs/pitch-video-script.md`](docs/pitch-video-script.md)
+- **YouTube Pitch Video (80s):** [https://youtu.be/57xZQnxHf50](https://youtu.be/57xZQnxHf50)
+- **Local Demo Video (MP4):** [`docs/kanakku_demo_video.mp4`](docs/kanakku_demo_video.mp4)
+- **Pitch Script & Shot List:** [`docs/pitch-video-script.md`](docs/pitch-video-script.md)
 
 ---
 
