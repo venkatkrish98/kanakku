@@ -2,23 +2,27 @@
 
 > **Amazon Developer Hackathon 2026 — Build, Ship, Shape**  
 > **Primary Track:** Alexa+ (Model Context Protocol / Agentic AI)  
-> **Mini Challenge:** AWS Builder  
+> **Mini Challenge:** AWS Builder
 
 ---
 
 ## 1. Project Overview
 
 ### 1.1. The Human Problem
+
 India is home to over 63 million Micro, Small, and Medium Enterprises (MSMEs) powering nearly 30% of the nation's GDP. Yet, small business owners spend dozens of hours every month wrestling with rigid, desktop-bound accounting software or paper ledgers. Traditional accounting tools require extensive manual data entry, complex GST calculation rules (CGST, SGST, IGST set-offs), and constant reconciliation. Worse, most lightweight invoice apps lack true double-entry accounting integrity, leading to unjournaled transactions, out-of-balance ledgers, and catastrophic audit penalties.
 
 ### 1.2. The Solution: Kanakku (கணக்கு)
-Named after the Tamil word for *accounts* and *calculations* (**கணக்கு**), **Kanakku** is a voice-first, agentic financial operating system designed for Indian MSMEs. Business owners can manage their entire accounting lifecycle using natural spoken language:
-- *"Create an invoice for Apex Labs for 50,000 rupees plus 18% GST due in 15 days."*
-- *"Record a travel expense of 3,200 rupees paid via UPI for client visit."*
-- *"Give me a business briefing and cashflow comparison against last month."*
-- *"Scan, reconcile, and close books for October 2026."*
+
+Named after the Tamil word for _accounts_ and _calculations_ (**கணக்கு**), **Kanakku** is a voice-first, agentic financial operating system designed for Indian MSMEs. Business owners can manage their entire accounting lifecycle using natural spoken language:
+
+- _"Create an invoice for Apex Labs for 50,000 rupees plus 18% GST due in 15 days."_
+- _"Record a travel expense of 3,200 rupees paid via UPI for client visit."_
+- _"Give me a business briefing and cashflow comparison against last month."_
+- _"Scan, reconcile, and close books for October 2026."_
 
 Kanakku bridges conversational simplicity with institutional financial rigor:
+
 1. **Deterministic Domain Engine**: LLMs only narrate and parse intent; all currency math is calculated deterministically in pure TypeScript using integer **paise** (1 INR = 100 paise) to eliminate floating-point rounding errors (ADR-002).
 2. **Draft -> Confirm -> Execute Mutation Safety**: Mutations never execute immediately. Kanakku creates a signed draft, renders an interactive visual preview card, and requires explicit user confirmation before touching the ledger (ADR-003, ADR-004).
 3. **Double-Entry General Ledger**: Every financial transaction generates balanced debit and credit journal lines adhering to standard Indian accounting standards.
@@ -29,7 +33,8 @@ Kanakku bridges conversational simplicity with institutional financial rigor:
 ## 2. Demo Video & Walkthrough
 
 A complete high-definition walkthrough of Kanakku's voice copilot, self-hosted Model Context Protocol server, and double-entry ledger in action is available:
-- **YouTube Pitch Video (80s):** [https://youtu.be/57xZQnxHf50](https://youtu.be/57xZQnxHf50)
+
+- **YouTube Pitch Video (1080p Full HD):** [https://youtu.be/tp9Dyy73WlU](https://youtu.be/tp9Dyy73WlU)
 - **Local Demo Video (MP4):** [`docs/kanakku_demo_video.mp4`](docs/kanakku_demo_video.mp4)
 - **Pitch Script & Shot List:** [`docs/pitch-video-script.md`](docs/pitch-video-script.md)
 
@@ -40,6 +45,7 @@ A complete high-definition walkthrough of Kanakku's voice copilot, self-hosted M
 Kanakku is built from the ground up on the **Model Context Protocol (MCP)**, the foundational standard for the **Alexa+ Track**:
 
 ### 2.1. Self-Hosted MCP Server (`@modelcontextprotocol/sdk`)
+
 - **Transport**: **Streamable HTTP** (`/mcp`) adhering to MCP specification version `2025-11-25`.
 - **Session Multiplexing**: Stateful multi-turn agent sessions managed via `mcp-session-id` headers.
 - **13 Canonical Financial Tools**:
@@ -74,16 +80,20 @@ Kanakku is built from the ground up on the **Model Context Protocol (MCP)**, the
   - `business_briefing`: Comprehensive financial health check.
 
 ### 2.2. Interactive MCP Apps Extension (`@modelcontextprotocol/ext-apps`)
+
 Kanakku implements the new **MCP Apps (`ui://`) extension**. When the client negotiates UI capabilities, the MCP server serves interactive HTML/CSS cards (`text/html;profile=mcp-app`):
+
 - **Invoice Card**: Displays line items, HSN codes, and tax breakdowns with an interactive **Approve & Issue** button.
 - **Month-End Close Card**: Interactive reconciliation checklist displaying unjournaled transactions, GST set-off balances, and period lock warnings.
 - **Fallback Compatibility**: For voice-only clients (e.g. smart speakers), the server returns clean, concise spoken summaries.
 
 ### 2.3. Alexa+ Track Alignment & Architecture Disclosure
+
 Per official Devpost guidance and FAQs, developer tooling for unreleased native Alexa+ is not accessible to hackathon participants. To strictly fulfill the **Alexa+ Track** requirements:
+
 - Kanakku implements a fully compliant, production-grade **Self-Hosted Model Context Protocol (MCP) Server** over Streamable HTTP (`/mcp`), ready to connect to any MCP-compliant agent host.
 - We pair this with an interactive **Alexa+ Experience Simulator** (`/voice`) in the Next.js console, featuring Indian English speech-to-text (`en-IN`), real-time audio waveform visualizers, Amazon Bedrock Converse multi-turn intent routing, and live rendering of interactive MCP App approval cards.
-- Kanakku does *not* claim native access to unreleased private Alexa+ developer toolkits; it demonstrates the exact agentic MCP architecture intended for next-generation Alexa+ agent workflows.
+- Kanakku does _not_ claim native access to unreleased private Alexa+ developer toolkits; it demonstrates the exact agentic MCP architecture intended for next-generation Alexa+ agent workflows.
 
 ---
 
@@ -128,31 +138,33 @@ Per official Devpost guidance and FAQs, developer tooling for unreleased native 
 
 ## 5. Built With
 
-| Layer / Component | Technology / Product | Specific Role in Kanakku |
-| :--- | :--- | :--- |
-| **Agent Protocol** | **Model Context Protocol (MCP)** | Canonical tool and resource execution protocol (`@modelcontextprotocol/sdk` spec `2025-11-25`). |
-| **Interactive UI** | **MCP Apps Extension** | Interactive visual approval cards served over `ui://` templates (`@modelcontextprotocol/ext-apps`). |
-| **LLM Orchestration** | **Amazon Bedrock Converse API** | Intent classification and multi-turn conversational synthesis using Anthropic Claude 3.5 Sonnet. |
-| **Container Compute** | **AWS App Runner** | Serverless container execution for MCP server and console web app. |
-| **Database** | **Amazon RDS PostgreSQL 16** | Relational double-entry ledger, transaction outbox, and period locks. |
-| **Operational Audit Sink** | **Amazon CloudWatch Logs** | Append-only external anchoring for cryptographic hash chain heads (365-day retention). |
-| **Secrets & Keys** | **AWS Secrets Manager** | Dynamic injection of runtime connection strings and signing keys. |
-| **Infrastructure as Code**| **Terraform (AWS Provider)** | Automated, reproducible cloud provisioning across VPC, RDS, and App Runner. |
-| **Database ORM** | **Drizzle ORM** | Type-safe SQL schema, automated migrations, and integer paise BigInt mapping. |
-| **Frontend Framework**| **Next.js 15 (App Router)** | Full-stack React console, streaming route handlers, and audio waveform visualizer. |
-| **Speech Interface** | **Web Speech API** | Client-side Indian English speech-to-text (`en-IN`) and speech synthesis. |
-| **Validation** | **Zod** | Strict runtime schema validation for financial tool inputs and parameters. |
+| Layer / Component          | Technology / Product             | Specific Role in Kanakku                                                                            |
+| :------------------------- | :------------------------------- | :-------------------------------------------------------------------------------------------------- |
+| **Agent Protocol**         | **Model Context Protocol (MCP)** | Canonical tool and resource execution protocol (`@modelcontextprotocol/sdk` spec `2025-11-25`).     |
+| **Interactive UI**         | **MCP Apps Extension**           | Interactive visual approval cards served over `ui://` templates (`@modelcontextprotocol/ext-apps`). |
+| **LLM Orchestration**      | **Amazon Bedrock Converse API**  | Intent classification and multi-turn conversational synthesis using Anthropic Claude 3.5 Sonnet.    |
+| **Container Compute**      | **AWS App Runner**               | Serverless container execution for MCP server and console web app.                                  |
+| **Database**               | **Amazon RDS PostgreSQL 16**     | Relational double-entry ledger, transaction outbox, and period locks.                               |
+| **Operational Audit Sink** | **Amazon CloudWatch Logs**       | Append-only external anchoring for cryptographic hash chain heads (365-day retention).              |
+| **Secrets & Keys**         | **AWS Secrets Manager**          | Dynamic injection of runtime connection strings and signing keys.                                   |
+| **Infrastructure as Code** | **Terraform (AWS Provider)**     | Automated, reproducible cloud provisioning across VPC, RDS, and App Runner.                         |
+| **Database ORM**           | **Drizzle ORM**                  | Type-safe SQL schema, automated migrations, and integer paise BigInt mapping.                       |
+| **Frontend Framework**     | **Next.js 15 (App Router)**      | Full-stack React console, streaming route handlers, and audio waveform visualizer.                  |
+| **Speech Interface**       | **Web Speech API**               | Client-side Indian English speech-to-text (`en-IN`) and speech synthesis.                           |
+| **Validation**             | **Zod**                          | Strict runtime schema validation for financial tool inputs and parameters.                          |
 
 ---
 
 ## 6. Local Quickstart & Verification
 
 ### Prerequisites
+
 - Node.js 22+
 - pnpm 12.6.0+ (`corepack enable`)
 - Docker & Docker Compose
 
 ### 1. Start Database & Run Migrations
+
 ```bash
 # Start local PostgreSQL 16 container
 docker compose up -d
@@ -165,6 +177,7 @@ pnpm --filter @kanakku/db seed
 ```
 
 ### 2. Start Services
+
 ```bash
 # Start MCP Server (Port 3001)
 pnpm --filter @kanakku/mcp-server dev
@@ -174,12 +187,14 @@ pnpm --filter @kanakku/console dev
 ```
 
 ### 3. Verify Health Endpoints
+
 - **MCP Server**: `http://localhost:3001/health`
 - **Web Console**: `http://localhost:3000/api/health`
 - **Interactive Voice Simulator**: `http://localhost:3000/voice`
 - **Books Dashboard**: `http://localhost:3000/`
 
 ### 4. Live MCP Streamable HTTP Demo via curl
+
 You can interact directly with the running MCP server over Streamable HTTP:
 
 ```bash
@@ -240,4 +255,3 @@ pnpm typecheck
 ## 9. License
 
 This project is licensed under the MIT License — see the [`LICENSE`](LICENSE) file for details.
-
