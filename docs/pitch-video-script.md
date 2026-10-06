@@ -49,7 +49,7 @@
   - Switch to full-screen screencast of the Alexa+ Voice Simulator at `/voice`.
   - Operator presses Push-to-Talk. The audio waveform pulses smoothly.
   - Spoken Input: *"Issue an invoice to Apex Labs for 50,000 rupees plus 18% GST, due in 15 days."*
-  - On-screen: Bedrock Converse parses intent and streams the `create_invoice` tool call to our self-hosted Streamable HTTP MCP server.
+  - On-screen: Bedrock Converse parses intent and dispatches the `create_invoice` tool call to our self-hosted Streamable HTTP MCP server.
   - An interactive **MCP App Card (`ui://cards/invoice-draft`)** renders seamlessly inside the session showing the customer name, HSN code, CGST (₹4,500), SGST (₹4,500), and total ₹59,000.
   - Operator clicks **Approve & Issue** (or says *"Confirm"*).
   - The single-use confirmation token is consumed; journal entries post immediately.

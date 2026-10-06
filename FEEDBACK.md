@@ -54,19 +54,19 @@ This document contains authentic, empirical developer feedback and friction logg
   Multi-turn conversational orchestration in the web console (`/voice`), intent classification, natural language entity extraction (rupees, paise, vendor names, GSTINs), and natural language voice summary generation using Anthropic Claude 3.5 Sonnet (`anthropic.claude-3-5-sonnet-20241022-v2:0`).
 
 - **What worked well**:  
-  - The Converse API (`ConverseCommand` / `ConverseStreamCommand`) provides a unified multi-turn schema that eliminates provider-specific payload idiosyncrasies.
+  - The Converse API (`ConverseCommand`) provides a unified multi-turn schema that eliminates provider-specific payload idiosyncrasies.
   - Exceptional accuracy extracting complex Indian financial terms (e.g., "5000 rupees plus 18% GST for catering", "inter-state IGST", "TDS deduction").
-  - Streaming tool calls and conversational responses dramatically reduced perceived voice latency.
+  - Rapid multi-turn tool calling and conversational responses provided sub-second turn latency for voice interaction.
 
 - **What needs improvement**:  
   - In `@aws-sdk/client-bedrock-runtime`, the TypeScript `Tool` union expects internal `$unknown` variants, requiring type casting (`as unknown as Tool[]`) when passing external tool schemas.
   - Rate limiting and throttling exceptions (ThrottlingException) could benefit from higher default SDK retry backoffs in low-quota sandbox accounts.
 
 - **Onboarding experience from zero to hello world**:  
-  - Model access for Anthropic Claude 3.5 Sonnet in `ap-south-1` was requested and approved in the AWS Console Model Access panel within 5 minutes. Once activated, configuring the Converse API with AWS SDK v3 took under 20 minutes to achieve streaming multi-turn voice dialog.
+  - Model access for Anthropic Claude 3.5 Sonnet in `ap-south-1` was requested and approved in the AWS Console Model Access panel within 5 minutes. Once activated, configuring the Converse API with AWS SDK v3 took under 20 minutes to achieve working multi-turn voice dialog.
 
 - **Whether we would build with it again and why**:  
-  - **Yes.** Bedrock Converse is enterprise-ready, adheres to strict data privacy boundaries (zero customer data retention for model training), and provides fast streaming latency for voice applications.
+  - **Yes.** Bedrock Converse is enterprise-ready, adheres to strict AWS data privacy terms (customer prompts and completions are never used to train AWS models and data remains within the designated region and IAM boundary), and provides rapid conversational response times for voice applications.
 
 ---
 
