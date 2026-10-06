@@ -16,7 +16,7 @@
 | **0:00 - 0:30** | **The Problem** | Montage: Small business owner buried in paper receipts, clunky desktop accounting software, GST calculator spreadsheets. | The painful reality of bookkeeping for 63M Indian MSMEs; why traditional software fails. |
 | **0:30 - 0:55** | **The Solution** | Kanakku logo animation (கணக்கு); transition to modern Books Dashboard and clean web interface. | Introducing Kanakku; voice-first financial OS built on institutional double-entry principles. |
 | **0:55 - 1:55** | **Live App & MCP in Action** | Screen capture of Alexa+ Simulator (`/voice`); push-to-talk waveform; MCP Streamable HTTP tool execution; interactive MCP App Card (`ui://`). | Demonstrating voice invoice creation, GST calculation, and visual approval via Model Context Protocol. |
-| **1:55 - 2:30** | **Institutional Rigor & AWS Architecture** | Close-month state machine; period lock error screen; CloudWatch audit trail anchor; AWS architecture diagram. | Double-entry integrity; month-end locking; CloudWatch WORM anchoring; AWS App Runner + RDS. |
+| **1:55 - 2:30** | **Institutional Rigor & AWS Architecture** | Close-month state machine; period lock error screen; CloudWatch audit trail anchor; AWS architecture diagram. | Double-entry integrity; month-end locking; CloudWatch append-only audit anchoring; AWS App Runner + RDS architecture. |
 | **2:30 - 2:48** | **Vision & Closing** | Executive briefing cards; closing title card with live GitHub repository & Devpost links. | Summary of impact for Bharat; empowering small businesses through voice AI. |
 
 ---
@@ -72,7 +72,7 @@
 - **Voiceover**:  
   *"Kanakku doesn't stop at invoicing. It manages full month-end closures with an automated state machine. Once a month is closed, Kanakku locks the ledger: backdated postings are strictly rejected.  
   To guarantee non-repudiation, the head of our serialized cryptographic hash chain is anchored to Amazon CloudWatch Logs using a durable PostgreSQL transactional outbox.  
-  The entire platform runs in production on AWS: containerized on AWS App Runner with private VPC egress, Amazon RDS PostgreSQL 16, and AWS Secrets Manager."*
+  The entire platform is architected and packaged for production on AWS: declarative Terraform infrastructure for AWS App Runner, private VPC egress to Amazon RDS PostgreSQL 16, and AWS Secrets Manager."*
 
 ---
 

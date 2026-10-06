@@ -47,12 +47,18 @@ Kanakku is built from the ground up on the **Model Context Protocol (MCP)**, the
   11. `close_month`: Multi-step resumable state machine (`scan` -> `categorise` -> `reconcile` -> `prepare_close`).
   12. `confirm_action`: Consumes single-use confirmation tokens to atomically execute verified drafts.
   13. `cancel_action`: Explicitly discards pending drafts.
-- **5 Live Resources**:
-  - `gst://status`: Real-time GST liability summary.
-  - `ledger://trial-balance`: Real-time balanced debit/credit trial balance.
-  - `audit://chain-health`: Cryptographic hash chain validation status.
-  - `session://context`: Multi-turn conversational context and active business memory.
-  - `ui://templates/*`: Dynamic visual confirmation cards.
+- **5 Canonical Business Resources**:
+  - `kanakku://business-summary`: Business profile, active customer count, YTD revenue, and outstanding receivables.
+  - `kanakku://chart-of-accounts`: Standard chart of accounts (Assets, Liabilities, Equity, Revenue, Expenses).
+  - `kanakku://gst-rates`: Statutory GST slabs (0%, 5%, 12%, 18%, 28%) and Section 49 set-off rules.
+  - `kanakku://audit-trail`: Cryptographic hash chain verification status, head sequence, and latest audit entry.
+  - `kanakku://business-memory`: Extracted conversational memory, customer GSTIN mappings, and business context.
+- **8 Interactive MCP App Resources (`ui://`)**:
+  - `ui://cards/gst-liability`: Real-time GST liability, ITC set-off breakdown, and filing due date.
+  - `ui://cards/business-briefing`: Executive financial briefing card with receivables, cashflows, and audit health.
+  - `ui://cards/invoice-draft` & `ui://cards/invoice-draft/{token}`: Interactive draft invoice approval cards with single-use confirmation token.
+  - `ui://cards/expense-draft` & `ui://cards/expense-draft/{token}`: Interactive expense review and confirmation cards.
+  - `ui://cards/month-end-summary` & `ui://cards/month-end-summary/{month}/{year}`: Month close checklist and financial report cards.
 - **3 Structured Workflow Prompts**:
   - `month_end_close`: Multi-step guided month-end closing workflow.
   - `weekly_briefing`: Weekly operational briefing for owners.
@@ -103,11 +109,11 @@ Per official Devpost guidance and FAQs, developer tooling for unreleased native 
 ```
 
 - **AWS App Runner**: Fully managed serverless container runtime hosting both the MCP Server and Next.js Web Console with zero server management, automatic SSL, and private VPC egress.
-- **Amazon Bedrock Converse API**: Orchestrates conversational multi-turn sessions using Anthropic Claude 3.5 Sonnet (`anthropic.claude-3-5-sonnet-20241022-v2:0`) with streaming latency and strict zero data retention.
+- **Amazon Bedrock Converse API**: Orchestrates conversational multi-turn sessions using Anthropic Claude 3.5 Sonnet (`anthropic.claude-3-5-sonnet-20241022-v2:0`) with low-latency streaming and AWS enterprise security boundaries.
 - **Amazon RDS for PostgreSQL 16**: Multi-AZ relational database providing ACID transaction guarantees, integer paise financial fields, and row-level locking (`FOR UPDATE SKIP LOCKED`) for background job workers.
 - **AWS Secrets Manager**: Stores and rotates runtime database credentials (`DATABASE_URL`), RDS master administrative credentials, and cryptographic audit signing keys (`AUDIT_ANCHOR_SECRET`).
 - **Amazon CloudWatch Logs**: Immutable append-only operational sink receiving HMAC-SHA256 signed audit head hashes upon month close.
-- **Terraform**: 100% declarative Infrastructure-as-Code in [`infra/terraform`](file:///c:/kanakku/infra/terraform).
+- **Terraform**: 100% declarative Infrastructure-as-Code in [`infra/terraform`](infra/terraform).
 
 ---
 
@@ -213,15 +219,15 @@ pnpm typecheck
 ## 7. Submission Artifacts
 
 - **Devpost Project Name**: Kanakku (கணக்கு) — Voice-First AI Bookkeeper for Indian MSMEs
-- **Pitch Video Script & Shot List (2m 48s)**: [`docs/pitch-video-script.md`](file:///c:/kanakku/docs/pitch-video-script.md)
-- **Developer & Platform Feedback**: [`FEEDBACK.md`](file:///c:/kanakku/FEEDBACK.md)
-- **Friction Log**: [`FRICTION_LOG.md`](file:///c:/kanakku/FRICTION_LOG.md)
-- **AWS Infrastructure Blueprint**: [`docs/aws.md`](file:///c:/kanakku/docs/aws.md)
-- **Architecture Specification**: [`docs/architecture.md`](file:///c:/kanakku/docs/architecture.md)
+- **Pitch Video Script & Shot List (2m 48s)**: [`docs/pitch-video-script.md`](docs/pitch-video-script.md)
+- **Developer & Platform Feedback**: [`FEEDBACK.md`](FEEDBACK.md)
+- **Friction Log**: [`FRICTION_LOG.md`](FRICTION_LOG.md)
+- **AWS Infrastructure Blueprint**: [`docs/aws.md`](docs/aws.md)
+- **Architecture Specification**: [`docs/architecture.md`](docs/architecture.md)
 
 ---
 
 ## 8. License
 
-This project is licensed under the MIT License — see the [`LICENSE`](file:///c:/kanakku/LICENSE) file for details.
+This project is licensed under the MIT License — see the [`LICENSE`](LICENSE) file for details.
 

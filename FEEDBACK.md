@@ -7,7 +7,7 @@ This document contains authentic, empirical developer feedback and friction logg
 ## 1. Model Context Protocol (MCP) TypeScript SDK (`@modelcontextprotocol/sdk`)
 
 - **What we used it for**:  
-  Implemented a self-hosted financial MCP server exposing 13 canonical accounting tools (`create_invoice`, `record_expense`, `close_month`, `confirm_action`, `whats_changed_since`, etc.), 5 tenant-scoped resources (`gst://status`, `ledger://trial-balance`, etc.), and 3 structured workflow prompts over Streamable HTTP (`/mcp`) adhering to MCP specification `2025-11-25`.
+  Implemented a self-hosted financial MCP server exposing 13 canonical accounting tools (`create_invoice`, `record_expense`, `close_month`, `confirm_action`, `whats_changed_since`, etc.), 5 tenant-scoped canonical business resources (`kanakku://business-summary`, `kanakku://chart-of-accounts`, `kanakku://gst-rates`, `kanakku://audit-trail`, `kanakku://business-memory`), 8 interactive MCP App resources (`ui://cards/*`), and 3 structured workflow prompts over Streamable HTTP (`/mcp`) adhering to MCP specification `2025-11-25`.
 
 - **What worked well**:  
   - Clean TypeScript interfaces for `McpServer`, `ResourceTemplate`, and Zod-based tool parameter schemas.
@@ -197,3 +197,24 @@ This document contains authentic, empirical developer feedback and friction logg
 
 - **Whether we would build with it again and why**:  
   - **Yes.** Essential for immutable, repeatable production cloud deployments.
+
+---
+
+## 10. AWS Secrets Manager SDK (`@aws-sdk/client-secrets-manager`)
+
+- **What we used it for**:  
+  Dynamic retrieval and parsing of administrative database credentials (`kanakku/production/database-admin-credentials`) and runtime connection strings (`kanakku/production/database-url`) during least-privilege PostgreSQL user provisioning in `bootstrapAppRole`.
+
+- **What worked well**:  
+  - Clean `GetSecretValueCommand` API in AWS SDK v3 with seamless IAM task role authentication.
+  - Native JSON payload storage allowed bundling host, port, username, and password into a single rotatable secret.
+
+- **What needs improvement**:  
+  - SDK responses return `SecretString` as a raw string, requiring manual `JSON.parse()` error handling.
+  - Local offline development requires fallback environment variable injection when AWS credentials are not configured.
+
+- **Onboarding experience from zero to hello world**:  
+  - Under 10 minutes: instantiating `SecretsManagerClient` and fetching secret values required only 8 lines of TypeScript.
+
+- **Whether we would build with it again and why**:  
+  - **Yes.** Centralized, encrypted secrets storage with IAM role-based access is non-negotiable for enterprise database security.

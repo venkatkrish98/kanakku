@@ -409,11 +409,11 @@ Kanakku supports the official Model Context Protocol UI extension (`io.modelcont
 
 ### 10.2 Card Client & Host Bridge Interoperability
 - **Card-Side Implementation**: Cards ship a self-contained, zero-dependency client (`window.mcpApp`) adhering to the MCP Apps JSON-RPC postMessage lifecycle (`ui/initialize`, `ui/notifications/initialized`, `ui/notifications/tool-result`, and `tools/call`).
-- **Host Bridge Compatibility**: The server provides a bidirectional bridge [`McpAppsHostBridge`](file:///c:/kanakku/packages/mcp-server/src/apps/index.ts) and routes incoming app actions through `/mcp/app-bridge`. Cards are verified against the official `@modelcontextprotocol/ext-apps/app-bridge` [`AppBridge`](file:///c:/kanakku/packages/mcp-server/src/apps/index.ts#L13-L25).
+- **Host Bridge Compatibility**: The server provides a bidirectional bridge [`McpAppsHostBridge`](../packages/mcp-server/src/apps/index.ts) and routes incoming app actions through `/mcp/app-bridge`. Cards are verified against the official `@modelcontextprotocol/ext-apps/app-bridge` [`AppBridge`](../packages/mcp-server/src/apps/index.ts#L13-L25).
 
 ### 10.3 Harness Security Architecture
 1. **Header-Only Authentication**: The testing host harness (`/apps/harness`) and bridge endpoint strictly require credentials in headers (`Authorization: Bearer <token>`, `mcp-session-id`, `x-confirmation-token`). No tokens or sessions are ever accepted via URL query parameters.
-2. **Safe HTML Script Context**: Configuration data injected into `<script type="application/json" id="mcp-harness-config">` is sanitized with [`safeJsonForHtml`](file:///c:/kanakku/packages/mcp-server/src/apps/index.ts#L32-L39), escaping `<` as `\u003c` to eliminate script breakout/DOM-injection risks.
+2. **Safe HTML Script Context**: Configuration data injected into `<script type="application/json" id="mcp-harness-config">` is sanitized with [`safeJsonForHtml`](../packages/mcp-server/src/apps/index.ts#L32-L39), escaping `<` as `\u003c` to eliminate script breakout/DOM-injection risks.
 3. **Strict Iframe Sandbox**: Harness iframes enforce `sandbox="allow-scripts allow-forms"`, omitting `allow-same-origin` to isolate the host origin.
 4. **Tenant-Scoped Draft Lookups**: Draft hydration in the harness enforces `business_id` and `user_id` equality, preventing cross-tenant leakage.
 5. **Ephemeral Session Boundary**: The harness uses temporary, user-scoped session identifiers (`mcp-session-id`) rather than exposing root API keys to front-end page scripts. Access remains restricted to authenticated, trusted operator environments.

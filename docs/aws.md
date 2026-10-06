@@ -67,8 +67,8 @@ The repository uses pnpm workspaces. Separate multi-stage Dockerfiles isolate bu
 
 ### 3.1. Image-Based Deployment vs `apprunner.yaml`
 - **Important**: AWS App Runner `apprunner.yaml` files are exclusively for source-code deployments from GitHub. For pre-built container images stored in Amazon ECR, App Runner services are provisioned via:
-  1. **Terraform**: Resources `aws_apprunner_service.mcp_server` and `aws_apprunner_service.console` in [`infra/terraform/main.tf`](file:///c:/kanakku/infra/terraform/main.tf).
-  2. **AWS CLI Input JSON**: [`infra/apprunner/mcp-server-service-input.json`](file:///c:/kanakku/infra/apprunner/mcp-server-service-input.json) and [`infra/apprunner/console-service-input.json`](file:///c:/kanakku/infra/apprunner/console-service-input.json) via `aws apprunner create-service --cli-input-json file://...`.
+  1. **Terraform**: Resources `aws_apprunner_service.mcp_server` and `aws_apprunner_service.console` in [`infra/terraform/main.tf`](../infra/terraform/main.tf).
+  2. **AWS CLI Input JSON**: [`infra/apprunner/mcp-server-service-input.json`](../infra/apprunner/mcp-server-service-input.json) and [`infra/apprunner/console-service-input.json`](../infra/apprunner/console-service-input.json) via `aws apprunner create-service --cli-input-json file://...`.
 
 ### 3.2. VPC Egress & Connectivity
 - When App Runner connects to private VPC subnets via `aws_apprunner_vpc_connector.rds_connector`, all egress traffic is directed into the VPC.
@@ -92,7 +92,7 @@ The repository uses pnpm workspaces. Separate multi-stage Dockerfiles isolate bu
 
 ### 4.2. Secrets Manager Integration & Least-Privilege Role Separation
 - **Runtime Application User (`kanakku_app`)**:  
-  Runtime containers (MCP server and Web Console) connect using a dedicated least-privilege database user `kanakku_app` provisioned via [`infra/db/init-runtime-user.sql`](file:///c:/kanakku/infra/db/init-runtime-user.sql). This user possesses strictly DML permissions (`SELECT`, `INSERT`, `UPDATE`, `DELETE`) on application tables and `USAGE` on sequences. It has zero DDL permissions (cannot drop, alter, or truncate tables).
+  Runtime containers (MCP server and Web Console) connect using a dedicated least-privilege database user `kanakku_app` provisioned via [`infra/db/init-runtime-user.sql`](../infra/db/init-runtime-user.sql). This user possesses strictly DML permissions (`SELECT`, `INSERT`, `UPDATE`, `DELETE`) on application tables and `USAGE` on sequences. It has zero DDL permissions (cannot drop, alter, or truncate tables).
 - **Dedicated Plain URL Secret (`kanakku/${var.environment}/database-url`)**:  
   Contains the raw PostgreSQL connection string URL for the runtime user:  
   `postgresql://kanakku_app:<password>@<endpoint>:5432/kanakkudb?sslmode=require`  
@@ -133,7 +133,7 @@ In accordance with Kanakku ADR-002:
 ## 6. Audit Trail Anchoring & Compliance Immutability (ADR-005)
 
 ### 6.1. Operational Anchoring vs Regulatory WORM Storage
-As specified in [ADR-005](file:///c:/kanakku/docs/adr/ADR-005-double-entry-ledger-and-audit.md), an internal cryptographic hash chain protects against application-level tampering. To defend against a database administrator or superuser rewriting database rows and regenerating hashes, Kanakku anchors the latest `entry_hash` to external append-only storage:
+As specified in [ADR-005](adr/ADR-005-double-entry-ledger-and-audit.md), an internal cryptographic hash chain protects against application-level tampering. To defend against a database administrator or superuser rewriting database rows and regenerating hashes, Kanakku anchors the latest `entry_hash` to external append-only storage:
 - **Operational Log Sink (CloudWatch Logs)**:  
   CloudWatch Logs receives append-only structured audit anchor events with a 365-day event expiration policy. Note that CloudWatch retention defines an automated deletion lifecycle after 365 days.
 - **Regulatory WORM Archive (Amazon S3 Object Lock)**:  
@@ -145,11 +145,11 @@ To prevent **phantom anchors** (external CloudWatch audit entries created for da
    - The month close, ledger locks, audit log entry, token consumption, and an `audit_anchor_outbox` record are written and committed in the **same atomic database transaction**.
    - If the transaction fails or rolls back, the outbox record rolls back as well (zero phantom anchors).
 2. **Post-Commit Execution & Idempotency Cache Sync**:
-   - Once the transaction is durably committed, [`processAuditAnchorOutboxItem`](file:///c:/kanakku/packages/mcp-server/src/audit/outbox.ts) attempts immediate dispatch to CloudWatch Logs using [`anchorAuditHead`](file:///c:/kanakku/packages/mcp-server/src/audit/anchor.ts).
+   - Once the transaction is durably committed, [`processAuditAnchorOutboxItem`](../packages/mcp-server/src/audit/outbox.ts) attempts immediate dispatch to CloudWatch Logs using [`anchorAuditHead`](../packages/mcp-server/src/audit/anchor.ts).
    - Upon success: The outbox record is marked `status: 'anchored'`, and the stored `idempotencyRecords.responsePayload` is updated in the database. Any repeated client request returns the verified receipt rather than stale `pending`.
    - Upon transient failure: The outbox item remains in the database with `status: 'failed'`, `attempts: 1`, and `lastError`. The API response returns `status: 'pending_retry'`.
 3. **Multi-Instance Concurrency Protection (`FOR UPDATE SKIP LOCKED`)**:
-   - To safely run multiple horizontal MCP server instances or background workers without collision, [`claimAuditAnchorOutboxBatch`](file:///c:/kanakku/packages/mcp-server/src/audit/outbox.ts) queries pending/failed rows using PostgreSQL's `FOR UPDATE SKIP LOCKED` and applies a 120-second `locked_until` lease.
+   - To safely run multiple horizontal MCP server instances or background workers without collision, [`claimAuditAnchorOutboxBatch`](../packages/mcp-server/src/audit/outbox.ts) queries pending/failed rows using PostgreSQL's `FOR UPDATE SKIP LOCKED` and applies a 120-second `locked_until` lease.
    - Concurrent instances skip already-claimed rows without blocking or duplicate dispatches.
 4. **Production Background Worker Wiring**:
    - The MCP server process automatically starts a background worker loop (`startAuditOutboxWorker`) on startup (polling every 30 seconds; configurable via `AUDIT_OUTBOX_POLL_INTERVAL_MS` or disabled via `AUDIT_OUTBOX_WORKER_ENABLED=false`).
