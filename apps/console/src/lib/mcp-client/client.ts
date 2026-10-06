@@ -142,6 +142,10 @@ export class McpHttpClient {
       throw new Error('MCP_CLIENT_UNAUTHENTICATED: Authentication token is required to invoke MCP server');
     }
 
+    if (!this.sessionId && method !== 'initialize') {
+      await this.initialize();
+    }
+
     const id = this.messageCounter++;
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
