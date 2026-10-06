@@ -1,0 +1,44 @@
+{
+  "ServiceName": "kanakku-mcp-server",
+  "SourceConfiguration": {
+    "ImageRepository": {
+      "ImageIdentifier": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/kanakku-mcp-server:latest",
+      "ImageConfiguration": {
+        "Port": "3001",
+        "RuntimeEnvironmentVariables": {
+          "NODE_ENV": "production",
+          "PORT": "3001",
+          "CLOUDWATCH_AUDIT_LOG_GROUP": "/kanakku/production/audit-anchors"
+        },
+        "RuntimeEnvironmentSecrets": {
+          "DATABASE_URL": "arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT_ID}:secret:kanakku/prod/database-url",
+          "AUDIT_ANCHOR_SECRET": "arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT_ID}:secret:kanakku/prod/audit-anchor-secret"
+        }
+      },
+      "ImageRepositoryType": "ECR"
+    },
+    "AuthenticationConfiguration": {
+      "AccessRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/KanakkuAppRunnerECRAccessRole"
+    },
+    "AutoDeploymentsEnabled": false
+  },
+  "InstanceConfiguration": {
+    "Cpu": "1024",
+    "Memory": "2048",
+    "InstanceRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/KanakkuAppRunnerInstanceRole"
+  },
+  "HealthCheckConfiguration": {
+    "Protocol": "HTTP",
+    "Path": "/health",
+    "Interval": 10,
+    "Timeout": 5,
+    "HealthyThreshold": 1,
+    "UnhealthyThreshold": 3
+  },
+  "NetworkConfiguration": {
+    "EgressConfiguration": {
+      "EgressType": "VPC",
+      "VpcConnectorArn": "arn:aws:apprunner:${AWS_REGION}:${AWS_ACCOUNT_ID}:vpcconnector/kanakku-rds-connector"
+    }
+  }
+}

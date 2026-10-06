@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: kanakku-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kanakku_user
+      POSTGRES_PASSWORD: kanakku_dev_password
+      POSTGRES_DB: kanakku_db
+    ports:
+      - '${POSTGRES_PORT:-5433}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U kanakku_user -d kanakku_db']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

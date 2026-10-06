@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/confirmation/index.ts","./src/gst/index.ts","./src/insights/index.ts","./src/invoice/index.ts","./src/money/index.ts"],"version":"5.9.3"}

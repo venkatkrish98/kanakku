@@ -1,0 +1,90 @@
+# syntax=docker/dockerfile:1
+# ==============================================================================
+# Kanakku Console - Production Container (AWS App Runner Compatible)
+# Next.js 15 Web Console & Conversational Voice Simulator on Port 3000
+# ==============================================================================
+
+# --- Stage 1: Build & Bundle ---
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+RUN corepack enable && corepack prepare pnpm@12.6.0 --activate
+RUN apk add --no-cache libc6-compat python3 make g++
+
+# Copy root configurations
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json ./
+
+# Copy package manifests
+COPY packages/core/package.json packages/core/tsconfig.json ./packages/core/
+COPY packages/db/package.json packages/db/tsconfig.json ./packages/db/
+COPY packages/mcp-server/package.json packages/mcp-server/tsconfig.json ./packages/mcp-server/
+COPY apps/console/package.json apps/console/tsconfig.json ./apps/console/
+
+# Install dependencies across monorepo
+RUN pnpm install --frozen-lockfile
+
+# Copy source trees
+COPY packages/core/src ./packages/core/src
+COPY packages/db/src ./packages/db/src
+COPY packages/db/drizzle.config.ts ./packages/db/
+COPY packages/mcp-server/src ./packages/mcp-server/src
+COPY apps/console/src ./apps/console/src
+COPY apps/console/next.config.mjs apps/console/next-env.d.ts ./apps/console/
+
+# Build internal packages
+RUN pnpm --filter @kanakku/core build
+RUN pnpm --filter @kanakku/db build
+RUN pnpm --filter @kanakku/mcp-server build
+
+# Build Next.js 15 production bundle
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+RUN pnpm --filter @kanakku/console build
+
+# --- Stage 2: Production Runtime ---
+FROM node:22-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Create non-privileged system user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# Copy root workspace and node_modules
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
+
+COPY --from=builder /app/packages/core/package.json ./packages/core/package.json
+COPY --from=builder /app/packages/core/dist ./packages/core/dist
+
+COPY --from=builder /app/packages/db/package.json ./packages/db/package.json
+COPY --from=builder /app/packages/db/dist ./packages/db/dist
+
+COPY --from=builder /app/packages/mcp-server/package.json ./packages/mcp-server/package.json
+COPY --from=builder /app/packages/mcp-server/dist ./packages/mcp-server/dist
+
+COPY --from=builder /app/apps/console/package.json ./apps/console/package.json
+COPY --from=builder /app/apps/console/next.config.mjs ./apps/console/next.config.mjs
+COPY --from=builder /app/apps/console/.next ./apps/console/.next
+COPY --from=builder /app/apps/console/src ./apps/console/src
+
+# Set ownership
+RUN chown -R nextjs:nodejs /app
+
+USER nextjs
+
+EXPOSE 3000
+
+# App Runner / Container Health Check
+HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -q --spider http://127.0.0.1:3000/api/health || exit 1
+
+WORKDIR /app/apps/console
+
+CMD ["../../node_modules/.bin/next", "start", "--port", "3000"]

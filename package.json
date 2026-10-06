@@ -1,0 +1,29 @@
+{
+  "name": "kanakku-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm -r run typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build": "pnpm -r run build",
+    "seed": "pnpm --filter @kanakku/db run seed",
+    "db:generate": "pnpm --filter @kanakku/db run db:generate",
+    "db:migrate": "pnpm --filter @kanakku/db run db:migrate",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "@types/node": "^22.13.4",
+    "eslint": "^9.20.1",
+    "prettier": "^3.5.1",
+    "tsx": "^4.23.15",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.24.1",
+    "vitest": "^3.0.6"
+  },
+  "packageManager": "pnpm@12.6.0"
+}

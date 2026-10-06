@@ -1,0 +1,1 @@
+ALTER TABLE "audit_anchor_outbox" ADD COLUMN "locked_until" timestamp with time zone;
