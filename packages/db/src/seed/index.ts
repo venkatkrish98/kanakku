@@ -158,9 +158,7 @@ export function generateSeedDataset(options?: SeedOptions): SeedDataResult {
 
   // Do not seed a usable fixed credential. Require an out-of-band secret or generate one dynamically for local development.
   const ownerApiKey =
-    options?.ownerApiKey ||
-    process.env['SEED_OWNER_API_KEY'] ||
-    randomBytes(24).toString('hex');
+    options?.ownerApiKey || process.env['SEED_OWNER_API_KEY'] || randomBytes(24).toString('hex');
   const ownerApiKeyHash = createHash('sha256').update(ownerApiKey).digest('hex');
 
   const business = {

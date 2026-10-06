@@ -58,22 +58,22 @@ export async function authenticateToken(
 
   // Explicitly reject insecure client identity shortcuts
   if (cleanToken.startsWith('user:') || cleanToken.includes('@')) {
-    throw new Error('INVALID_CREDENTIALS: User ID and email shortcuts are not permitted as credentials');
+    throw new Error(
+      'INVALID_CREDENTIALS: User ID and email shortcuts are not permitted as credentials',
+    );
   }
 
   // API Key lookup strictly via SHA-256 hash match against users table
   const tokenHash = createHash('sha256').update(cleanToken).digest('hex');
-  const foundUsers = await db
-    .select()
-    .from(users)
-    .where(eq(users.apiKeyHash, tokenHash))
-    .limit(1);
+  const foundUsers = await db.select().from(users).where(eq(users.apiKeyHash, tokenHash)).limit(1);
 
   if (foundUsers.length > 0 && foundUsers[0]) {
     return resolveUserContextById(foundUsers[0].id, db);
   }
 
-  throw new Error('INVALID_CREDENTIALS: Provided authentication token does not match any valid tenant');
+  throw new Error(
+    'INVALID_CREDENTIALS: Provided authentication token does not match any valid tenant',
+  );
 }
 
 /**

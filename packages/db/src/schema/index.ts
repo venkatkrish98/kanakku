@@ -564,7 +564,10 @@ export const auditAnchorOutbox = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
-    unique('uq_audit_anchor_outbox_biz_entity').on(table.businessId, table.targetEntityType, table.targetEntityId),
+    unique('uq_audit_anchor_outbox_biz_entity').on(
+      table.businessId,
+      table.targetEntityType,
+      table.targetEntityId,
+    ),
   ],
 );
-

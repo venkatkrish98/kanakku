@@ -99,10 +99,7 @@ export async function getNextInvoiceNumber(
     .select({ invoiceNumber: invoices.invoiceNumber })
     .from(invoices)
     .where(
-      and(
-        eq(invoices.businessId, businessId),
-        sql`${invoices.invoiceNumber} LIKE ${prefix + '%'}`,
-      ),
+      and(eq(invoices.businessId, businessId), sql`${invoices.invoiceNumber} LIKE ${prefix + '%'}`),
     )
     .orderBy(desc(invoices.invoiceNumber))
     .limit(1);
@@ -164,7 +161,12 @@ export async function verifyPeriodLedgerCoverage(
   startDate: Date,
   endDate: Date,
   activeInvoices: Array<{ id: string; invoiceNumber: string; totalPaise?: bigint; status: string }>,
-  activeExpenses: Array<{ id: string; description?: string | null; amountPaise?: bigint; status: string }>,
+  activeExpenses: Array<{
+    id: string;
+    description?: string | null;
+    amountPaise?: bigint;
+    status: string;
+  }>,
   activePayments: Array<{ id: string; referenceNumber?: string | null; amountPaise?: bigint }>,
 ): Promise<LedgerVerificationResult> {
   // 1. Fetch journal entries strictly dated within the requested period
@@ -251,7 +253,7 @@ export async function verifyPeriodLedgerCoverage(
   }
 
   // 2. Map period entries by sourceEntityType:sourceEntityId
-  const sourceMap = new Map<string, Array<typeof entries[number]>>();
+  const sourceMap = new Map<string, Array<(typeof entries)[number]>>();
   for (const entry of entries) {
     if (entry.sourceEntityType && entry.sourceEntityId) {
       const key = `${entry.sourceEntityType}:${entry.sourceEntityId}`;
@@ -287,7 +289,12 @@ export async function verifyPeriodLedgerCoverage(
     } else {
       const entry = matching[0]!;
       const stats = entryStats.get(entry.id);
-      if (!stats || stats.lineCount === 0 || stats.debits === 0n || stats.debits !== stats.credits) {
+      if (
+        !stats ||
+        stats.lineCount === 0 ||
+        stats.debits === 0n ||
+        stats.debits !== stats.credits
+      ) {
         missingJournalTransactions.push({ type, id, reference, expectedAmountPaise: expNum });
       } else if (expectedAmountPaise !== undefined && stats.debits !== expectedAmountPaise) {
         amountMismatchTransactions.push({

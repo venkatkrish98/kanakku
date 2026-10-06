@@ -31,11 +31,13 @@ export class CloudWatchLogsSink implements AuditAnchorSink {
   private logGroupName: string;
 
   constructor(
-    logGroupName: string = process.env['CLOUDWATCH_AUDIT_LOG_GROUP'] ?? '/kanakku/production/audit-anchors',
+    logGroupName: string = process.env['CLOUDWATCH_AUDIT_LOG_GROUP'] ??
+      '/kanakku/production/audit-anchors',
     client?: CloudWatchLogsClient,
   ) {
     this.logGroupName = logGroupName;
-    this.client = client ?? new CloudWatchLogsClient({ region: process.env['AWS_REGION'] ?? 'ap-south-1' });
+    this.client =
+      client ?? new CloudWatchLogsClient({ region: process.env['AWS_REGION'] ?? 'ap-south-1' });
   }
 
   async anchor(receipt: AuditAnchorReceipt): Promise<void> {
@@ -59,7 +61,10 @@ export class CloudWatchLogsSink implements AuditAnchorSink {
         }),
       );
     } catch (err: unknown) {
-      if (!(err instanceof ResourceAlreadyExistsException) && (err as { name?: string })?.name !== 'ResourceAlreadyExistsException') {
+      if (
+        !(err instanceof ResourceAlreadyExistsException) &&
+        (err as { name?: string })?.name !== 'ResourceAlreadyExistsException'
+      ) {
         // In local environments or if log group / stream doesn't exist, log warning or propagate
         if (process.env['NODE_ENV'] === 'production') {
           throw err;
@@ -145,7 +150,8 @@ export async function anchorAuditHead(
     headHash: verification.headHash,
     anchoredAt,
     sinkType: 'cloudwatch_logs',
-    sinkIdentifier: process.env['CLOUDWATCH_AUDIT_LOG_GROUP'] ?? '/kanakku/production/audit-anchors',
+    sinkIdentifier:
+      process.env['CLOUDWATCH_AUDIT_LOG_GROUP'] ?? '/kanakku/production/audit-anchors',
     receiptSignature: signature,
   };
 

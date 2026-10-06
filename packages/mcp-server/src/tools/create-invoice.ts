@@ -22,11 +22,7 @@ export const createInvoiceSchema = {
       z.object({
         description: z.string().min(1).describe('Line item description'),
         quantity: z.number().int().positive().default(1).describe('Quantity'),
-        unit_price_paise: z
-          .number()
-          .int()
-          .nonnegative()
-          .describe('Unit price in integer paise'),
+        unit_price_paise: z.number().int().nonnegative().describe('Unit price in integer paise'),
         gst_rate_bps: z
           .number()
           .int()
@@ -80,7 +76,9 @@ export async function handleCreateInvoice(
       .limit(1);
 
     if (!found[0]) {
-      throw new Error(`CUSTOMER_NOT_FOUND: Customer with ID "${args.customer_id}" not found in your business`);
+      throw new Error(
+        `CUSTOMER_NOT_FOUND: Customer with ID "${args.customer_id}" not found in your business`,
+      );
     }
     customer = found[0];
   } else if (args.customer_name) {
@@ -104,7 +102,9 @@ export async function handleCreateInvoice(
       .limit(1);
 
     if (!found[0]) {
-      throw new Error(`CUSTOMER_NOT_FOUND: Customer "${args.customer_name}" not found in your business`);
+      throw new Error(
+        `CUSTOMER_NOT_FOUND: Customer "${args.customer_name}" not found in your business`,
+      );
     }
     customer = found[0];
   } else {

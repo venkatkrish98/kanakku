@@ -247,12 +247,7 @@ export async function processPendingAuditOutbox(
   let failed = 0;
 
   for (const id of claimedIds) {
-    const result = await processAuditAnchorOutboxItem(
-      id,
-      db,
-      options?.sink,
-      options?.secretKey,
-    );
+    const result = await processAuditAnchorOutboxItem(id, db, options?.sink, options?.secretKey);
     results.push(result);
     if (result.status === 'anchored') {
       succeeded++;

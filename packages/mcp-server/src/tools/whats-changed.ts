@@ -1,7 +1,14 @@
 import { z } from 'zod';
 import { eq, and, gte, lte, inArray, desc } from 'drizzle-orm';
 import type { KanakkuDatabase } from '@kanakku/db';
-import { invoices, payments, expenses, businessMemory, expenseCategories, customers } from '@kanakku/db';
+import {
+  invoices,
+  payments,
+  expenses,
+  businessMemory,
+  expenseCategories,
+  customers,
+} from '@kanakku/db';
 import { formatInr, type AnomalyInsight, type UnderlyingReference } from '@kanakku/core';
 import { getTenantContext } from '../auth/index.js';
 
@@ -240,7 +247,8 @@ export async function handleWhatsChangedSince(
   } else if (newExpenses.length > 0) {
     voiceSummary = `You recorded ${newExpenses.length} new expense(s) totaling ${formatInr(expenseSurgesPaise)} since your last checkpoint.`;
   } else {
-    voiceSummary = 'There are no new financial movements or overdue status changes since your last checkpoint.';
+    voiceSummary =
+      'There are no new financial movements or overdue status changes since your last checkpoint.';
   }
 
   const response = {

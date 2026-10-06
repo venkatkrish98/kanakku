@@ -49,7 +49,9 @@ describe('Kanakku MCP Server Integration Suite', () => {
 
   const tenant1EmployeeId = '10000000-0000-0000-0000-000000000099';
   const tenant1EmployeeSecret = 'kanakku_test_secret_employee_2026';
-  const tenant1EmployeeApiKeyHash = createHash('sha256').update(tenant1EmployeeSecret).digest('hex');
+  const tenant1EmployeeApiKeyHash = createHash('sha256')
+    .update(tenant1EmployeeSecret)
+    .digest('hex');
   const validApiKeyHash = createHash('sha256').update(validToken).digest('hex');
 
   beforeAll(async () => {
@@ -223,14 +225,28 @@ describe('Kanakku MCP Server Integration Suite', () => {
       headers: res.headers,
       sessionId: res.headers.get('mcp-session-id'),
       data: json as Record<string, unknown> & {
-        result?: { content?: Array<{ text: string }>; tools?: Array<{ name: string }>; resources?: Array<{ uri: string }>; prompts?: Array<{ name: string }>; messages?: Array<{ content: { text: string } }>; isError?: boolean; protocolVersion?: string; serverInfo?: { name: string } };
+        result?: {
+          content?: Array<{ text: string }>;
+          tools?: Array<{ name: string }>;
+          resources?: Array<{ uri: string }>;
+          prompts?: Array<{ name: string }>;
+          messages?: Array<{ content: { text: string } }>;
+          isError?: boolean;
+          protocolVersion?: string;
+          serverInfo?: { name: string };
+        };
         error?: { code?: number; message?: string };
       },
       rawText: text,
     };
   }
 
-  function extractToolError(res: { data?: { error?: { message?: string }; result?: { isError?: boolean; content?: Array<{ text?: string }> } } }): string {
+  function extractToolError(res: {
+    data?: {
+      error?: { message?: string };
+      result?: { isError?: boolean; content?: Array<{ text?: string }> };
+    };
+  }): string {
     if (res.data?.error?.message) {
       return res.data.error.message;
     }
@@ -254,10 +270,7 @@ describe('Kanakku MCP Server Integration Suite', () => {
     });
 
     it('rejects unauthenticated requests to /mcp with 401', async () => {
-      const res = await mcpPost(
-        { jsonrpc: '2.0', id: 1, method: 'ping' },
-        { token: '' },
-      );
+      const res = await mcpPost({ jsonrpc: '2.0', id: 1, method: 'ping' }, { token: '' });
       expect(res.status).toBe(401);
       expect(res.data.error).toBe('UNAUTHENTICATED');
     });
@@ -879,7 +892,9 @@ describe('Kanakku MCP Server Integration Suite', () => {
       const explain = JSON.parse(explainRes.data.result.content[0].text);
       expect(explain.journal_entry.is_balanced).toBe(true);
       const lines = explain.journal_entry.lines;
-      const igstLine = lines.find((l: { account_name: string }) => l.account_name.includes('Input IGST'));
+      const igstLine = lines.find((l: { account_name: string }) =>
+        l.account_name.includes('Input IGST'),
+      );
       expect(igstLine).toBeDefined();
       expect(igstLine.debit_formatted).toBe('₹180.00');
     });
@@ -948,10 +963,14 @@ describe('Kanakku MCP Server Integration Suite', () => {
       expect(explain.journal_entry.is_balanced).toBe(true);
       const lines = explain.journal_entry.lines;
 
-      const expenseLine = lines.find((l: { account_name: string }) => l.account_name.includes('Expense'));
+      const expenseLine = lines.find((l: { account_name: string }) =>
+        l.account_name.includes('Expense'),
+      );
       expect(expenseLine.debit_formatted).toBe('₹2,360.00'); // Full gross capitalized
 
-      const inputTaxLine = lines.find((l: { account_name: string }) => l.account_name.includes('Input'));
+      const inputTaxLine = lines.find((l: { account_name: string }) =>
+        l.account_name.includes('Input'),
+      );
       expect(inputTaxLine).toBeUndefined(); // Zero credit claimed on balance sheet!
     });
 
@@ -1785,9 +1804,12 @@ describe('Kanakku MCP Server Integration Suite', () => {
         { sessionId: testSessionId, protocolVersion: '2025-11-25' },
       );
       expect(toolsRes.status).toBe(200);
-      const invoiceTool = (toolsRes.data.result.tools as Array<{ name: string; _meta?: { ui?: { resourceUri?: string } } }>).find(
-        (t) => t.name === 'create_invoice',
-      );
+      const invoiceTool = (
+        toolsRes.data.result.tools as Array<{
+          name: string;
+          _meta?: { ui?: { resourceUri?: string } };
+        }>
+      ).find((t) => t.name === 'create_invoice');
       expect(invoiceTool?._meta?.ui?.resourceUri).toBe('ui://cards/invoice-draft');
       const toolMetaUri = invoiceTool!._meta!.ui!.resourceUri!;
 
@@ -1903,10 +1925,18 @@ describe('Kanakku MCP Server Integration Suite', () => {
 
       // Assert that the card's ACTUAL script hydrated the DOM from the tool result
       expect(cardWindow.currentToken).toBe(draft.confirmation_token);
-      expect(dom.window.document.getElementById('card-invoice-number')?.textContent).toBe(draft.invoice_number);
-      expect(dom.window.document.getElementById('card-recipient')?.textContent).toBe('Ravi Traders');
-      expect(dom.window.document.getElementById('card-total')?.textContent).toBe(draft.total_formatted);
-      const confirmBtn = dom.window.document.getElementById('btn-confirm') as HTMLButtonElement | null;
+      expect(dom.window.document.getElementById('card-invoice-number')?.textContent).toBe(
+        draft.invoice_number,
+      );
+      expect(dom.window.document.getElementById('card-recipient')?.textContent).toBe(
+        'Ravi Traders',
+      );
+      expect(dom.window.document.getElementById('card-total')?.textContent).toBe(
+        draft.total_formatted,
+      );
+      const confirmBtn = dom.window.document.getElementById(
+        'btn-confirm',
+      ) as HTMLButtonElement | null;
       expect(confirmBtn?.disabled).toBe(false);
 
       // 5. User clicks Confirm in the card: the card's ACTUAL script calls window.handleConfirm()
@@ -1923,7 +1953,9 @@ describe('Kanakku MCP Server Integration Suite', () => {
         attempts++;
       }
 
-      expect(dom.window.document.getElementById('card-badge')?.textContent).toBe('Confirmed & Posted');
+      expect(dom.window.document.getElementById('card-badge')?.textContent).toBe(
+        'Confirmed & Posted',
+      );
 
       // 6. Verify draft is consumed in database and invoice exists
       const [consumed] = await db
@@ -2028,15 +2060,21 @@ describe('Kanakku MCP Server Integration Suite', () => {
 
       // Verify that every element strictly reflects Draft 2 using safe DOM properties:
       expect(cardWin.currentToken).toBe(draft2.confirmation_token);
-      expect(dom.window.document.getElementById('card-recipient')?.textContent).toBe('Meena Textiles');
+      expect(dom.window.document.getElementById('card-recipient')?.textContent).toBe(
+        'Meena Textiles',
+      );
       const itemsEl = dom.window.document.getElementById('card-items');
       expect(itemsEl?.textContent).toContain('Dedicated Cloud Compute Node');
       expect(itemsEl?.textContent).not.toContain('UltraBook Laptop Pro');
       const taxesEl = dom.window.document.getElementById('card-taxes');
       expect(taxesEl?.textContent).toContain('CGST:');
       expect(taxesEl?.textContent).not.toContain('IGST:');
-      expect(dom.window.document.getElementById('card-total')?.textContent).toBe(draft2.total_formatted);
-      expect(dom.window.document.getElementById('card-disclaimer')?.textContent).toContain(draft2.confirmation_token.slice(0, 10));
+      expect(dom.window.document.getElementById('card-total')?.textContent).toBe(
+        draft2.total_formatted,
+      );
+      expect(dom.window.document.getElementById('card-disclaimer')?.textContent).toContain(
+        draft2.confirmation_token.slice(0, 10),
+      );
       const btn = dom.window.document.getElementById('btn-confirm') as HTMLButtonElement | null;
       expect(btn?.disabled).toBe(false);
 
@@ -2089,7 +2127,8 @@ describe('Kanakku MCP Server Integration Suite', () => {
               due_date: '2026-12-31',
               line_items: [
                 {
-                  description: '<img src=x onerror="window.xssExecuted=true"><script>window.scriptExecuted=true</script>',
+                  description:
+                    '<img src=x onerror="window.xssExecuted=true"><script>window.scriptExecuted=true</script>',
                   hsn_sac: '998314',
                   quantity: 1,
                   unit_price_paise: 100000,
@@ -2178,7 +2217,9 @@ describe('Kanakku MCP Server Integration Suite', () => {
       expect(expenseCardWindow.itcXssExecuted).toBeUndefined();
       const itcEl = expenseDom.window.document.getElementById('card-itc-container');
       expect(itcEl?.getElementsByTagName('img').length).toBe(0);
-      expect(itcEl?.textContent).toContain('<img src=x onerror="window.itcXssExecuted=true">Sec 17(5)');
+      expect(itcEl?.textContent).toContain(
+        '<img src=x onerror="window.itcXssExecuted=true">Sec 17(5)',
+      );
 
       // Clean up
       await db.delete(pendingConfirmations).where(eq(pendingConfirmations.id, xssDraft.draft_id));
@@ -2271,7 +2312,7 @@ describe('Kanakku MCP Server Integration Suite', () => {
     });
 
     it('verifies BROWSER_HOST_LISTENER_SCRIPT contains standard MCP Apps postMessage proxy logic', () => {
-      expect(BROWSER_HOST_LISTENER_SCRIPT).toContain('window.addEventListener(\'message\'');
+      expect(BROWSER_HOST_LISTENER_SCRIPT).toContain("window.addEventListener('message'");
       expect(BROWSER_HOST_LISTENER_SCRIPT).toContain('ui/initialize');
       expect(BROWSER_HOST_LISTENER_SCRIPT).toContain('tools/call');
       expect(BROWSER_HOST_LISTENER_SCRIPT).toContain('fetch(targetUrl');
@@ -2315,10 +2356,14 @@ describe('Kanakku MCP Server Integration Suite', () => {
       expect(unauthHarnessRes.status).toBe(401);
 
       // Verify query-parameter auth_token, token, and session_id are strictly rejected with 401
-      const queryAuthRes = await fetch(`${baseUrl}/apps/harness?auth_token=${validToken}&draft_id=${draft.draft_id}`);
+      const queryAuthRes = await fetch(
+        `${baseUrl}/apps/harness?auth_token=${validToken}&draft_id=${draft.draft_id}`,
+      );
       expect(queryAuthRes.status).toBe(401);
 
-      const querySessionRes = await fetch(`${baseUrl}/apps/harness?session_id=${testSessionId}&draft_id=${draft.draft_id}`);
+      const querySessionRes = await fetch(
+        `${baseUrl}/apps/harness?session_id=${testSessionId}&draft_id=${draft.draft_id}`,
+      );
       expect(querySessionRes.status).toBe(401);
 
       // 3. Authenticated request with session ID and confirmation token strictly in headers (NEVER in URL)
@@ -2377,20 +2422,24 @@ describe('Kanakku MCP Server Integration Suite', () => {
           window.parent = {
             postMessage: (msg: any) => {
               // Deliver message from iframe to parent window
-              parentDom.window.dispatchEvent(new (parentDom.window as any).MessageEvent('message', {
-                data: msg,
-                source: {
-                  postMessage: (reply: any) => {
-                    // Deliver reply from parent back to iframe
-                    if (cardWindow) {
-                      cardWindow.dispatchEvent(new (cardWindow as any).MessageEvent('message', {
-                        data: reply,
-                        origin: parentDom.window.location.origin,
-                      }));
-                    }
+              parentDom.window.dispatchEvent(
+                new (parentDom.window as any).MessageEvent('message', {
+                  data: msg,
+                  source: {
+                    postMessage: (reply: any) => {
+                      // Deliver reply from parent back to iframe
+                      if (cardWindow) {
+                        cardWindow.dispatchEvent(
+                          new (cardWindow as any).MessageEvent('message', {
+                            data: reply,
+                            origin: parentDom.window.location.origin,
+                          }),
+                        );
+                      }
+                    },
                   },
-                },
-              }));
+                }),
+              );
             },
           } as any;
         },
@@ -2402,10 +2451,12 @@ describe('Kanakku MCP Server Integration Suite', () => {
         Object.defineProperty(iframeElement, 'contentWindow', {
           value: {
             postMessage: (msg: any) => {
-              cardWindow.dispatchEvent(new (cardWindow as any).MessageEvent('message', {
-                data: msg,
-                origin: parentDom.window.location.origin,
-              }));
+              cardWindow.dispatchEvent(
+                new (cardWindow as any).MessageEvent('message', {
+                  data: msg,
+                  origin: parentDom.window.location.origin,
+                }),
+              );
             },
           },
           configurable: true,
@@ -2474,9 +2525,12 @@ describe('Kanakku MCP Server Integration Suite', () => {
       expect(resUnauth.status).toBe(401);
 
       // 3. Requesting a draft with non-existent or other tenant's ID returns initialToolResult: null
-      const harnessNonExistent = await fetch(`${baseUrl}/apps/harness?draft_id=00000000-0000-0000-0000-000000000000`, {
-        headers: { Authorization: `Bearer ${validToken}` },
-      });
+      const harnessNonExistent = await fetch(
+        `${baseUrl}/apps/harness?draft_id=00000000-0000-0000-0000-000000000000`,
+        {
+          headers: { Authorization: `Bearer ${validToken}` },
+        },
+      );
       expect(harnessNonExistent.status).toBe(200);
       const nonExistentHtml = await harnessNonExistent.text();
       expect(nonExistentHtml).toContain('"initialToolResult":null');
@@ -2914,10 +2968,7 @@ describe('Kanakku MCP Server Integration Suite', () => {
       const confirmed = JSON.parse(confirmRes.data.result!.content![0]!.text);
       expect(confirmed.status).toBe('executed');
 
-      const [saved] = await db
-        .select()
-        .from(expenses)
-        .where(eq(expenses.id, confirmed.entity_id));
+      const [saved] = await db.select().from(expenses).where(eq(expenses.id, confirmed.entity_id));
       expect(saved?.isItcClaimed).toBe(false);
     });
 
@@ -3028,9 +3079,7 @@ describe('Kanakku MCP Server Integration Suite', () => {
               year: 2026,
               step: 'categorise',
               payload: {
-                categorisations: [
-                  { expense_id: julyExpense!.id, category_id: validCat!.id },
-                ],
+                categorisations: [{ expense_id: julyExpense!.id, category_id: validCat!.id }],
               },
             },
           },
@@ -3502,12 +3551,7 @@ describe('Kanakku MCP Server Integration Suite', () => {
       const [reclassAudit] = await db
         .select({ action: auditLogs.action, afterState: auditLogs.afterState })
         .from(auditLogs)
-        .where(
-          and(
-            eq(auditLogs.action, 'reclassify_expense'),
-            eq(auditLogs.entityId, expenseId),
-          ),
-        )
+        .where(and(eq(auditLogs.action, 'reclassify_expense'), eq(auditLogs.entityId, expenseId)))
         .limit(1);
 
       expect(reclassAudit).toBeDefined();
@@ -3895,9 +3939,9 @@ describe('Kanakku MCP Server Integration Suite', () => {
       const resText = resourceRes.data.result.contents[0].text;
       const memList = JSON.parse(resText);
       expect(Array.isArray(memList)).toBe(true);
-      expect(memList.some((m: { entityKey: string }) => m.entityKey === `customer:${customerId}`)).toBe(
-        true,
-      );
+      expect(
+        memList.some((m: { entityKey: string }) => m.entityKey === `customer:${customerId}`),
+      ).toBe(true);
     });
 
     it('reconciliation fails and gates month-close when a transaction lacks a balanced journal entry', async () => {
@@ -3957,7 +4001,12 @@ describe('Kanakku MCP Server Integration Suite', () => {
             method: 'tools/call',
             params: {
               name: 'close_month',
-              arguments: { month, year, step: 'reconcile', payload: { allow_general_expense: true } },
+              arguments: {
+                month,
+                year,
+                step: 'reconcile',
+                payload: { allow_general_expense: true },
+              },
             },
           },
           { sessionId: testSessionId, protocolVersion: '2025-11-25' },
@@ -4103,7 +4152,12 @@ describe('Kanakku MCP Server Integration Suite', () => {
             method: 'tools/call',
             params: {
               name: 'close_month',
-              arguments: { month, year, step: 'reconcile', payload: { allow_general_expense: true } },
+              arguments: {
+                month,
+                year,
+                step: 'reconcile',
+                payload: { allow_general_expense: true },
+              },
             },
           },
           { sessionId: testSessionId, protocolVersion: '2025-11-25' },
@@ -4160,14 +4214,19 @@ describe('Kanakku MCP Server Integration Suite', () => {
               jsonrpc: '2.0',
               id: 8023,
               method: 'tools/call',
-              params: { name: 'confirm_action', arguments: { confirmation_token: generated.tokenSecret } },
+              params: {
+                name: 'confirm_action',
+                arguments: { confirmation_token: generated.tokenSecret },
+              },
             },
             { sessionId: testSessionId, protocolVersion: '2025-11-25' },
           );
           const confirmErr = extractToolError(confirmRes);
           expect(confirmErr).toContain('UNJOURNALED_TRANSACTIONS_DETECTED');
         } finally {
-          await db.delete(pendingConfirmations).where(eq(pendingConfirmations.tokenHash, generated.tokenHash));
+          await db
+            .delete(pendingConfirmations)
+            .where(eq(pendingConfirmations.tokenHash, generated.tokenHash));
         }
       } finally {
         await db.delete(journalLines).where(eq(journalLines.journalEntryId, misdatedJeId));
@@ -4252,7 +4311,12 @@ describe('Kanakku MCP Server Integration Suite', () => {
             method: 'tools/call',
             params: {
               name: 'close_month',
-              arguments: { month, year, step: 'reconcile', payload: { allow_general_expense: true } },
+              arguments: {
+                month,
+                year,
+                step: 'reconcile',
+                payload: { allow_general_expense: true },
+              },
             },
           },
           { sessionId: testSessionId, protocolVersion: '2025-11-25' },
@@ -4263,9 +4327,7 @@ describe('Kanakku MCP Server Integration Suite', () => {
         expect(recData.ledger_balanced).toBe(false);
         expect(recData.unbalanced_entries).toContain('JE-202610-NO-LINES');
         expect(recData.invalid_journal_entries).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({ entryNumber: 'JE-202610-NO-LINES' }),
-          ]),
+          expect.arrayContaining([expect.objectContaining({ entryNumber: 'JE-202610-NO-LINES' })]),
         );
         expect(recData.missing_journal_transactions).toHaveLength(1);
         expect(recData.missing_journal_transactions[0].id).toBe(emptyJeInvId);
@@ -4314,14 +4376,21 @@ describe('Kanakku MCP Server Integration Suite', () => {
               jsonrpc: '2.0',
               id: 8033,
               method: 'tools/call',
-              params: { name: 'confirm_action', arguments: { confirmation_token: generated.tokenSecret } },
+              params: {
+                name: 'confirm_action',
+                arguments: { confirmation_token: generated.tokenSecret },
+              },
             },
             { sessionId: testSessionId, protocolVersion: '2025-11-25' },
           );
           const confirmErr = extractToolError(confirmRes);
-          expect(confirmErr).toMatch(/UNJOURNALED_TRANSACTIONS_DETECTED|UNBALANCED_JOURNAL_ENTRIES_DETECTED/);
+          expect(confirmErr).toMatch(
+            /UNJOURNALED_TRANSACTIONS_DETECTED|UNBALANCED_JOURNAL_ENTRIES_DETECTED/,
+          );
         } finally {
-          await db.delete(pendingConfirmations).where(eq(pendingConfirmations.tokenHash, generated.tokenHash));
+          await db
+            .delete(pendingConfirmations)
+            .where(eq(pendingConfirmations.tokenHash, generated.tokenHash));
         }
       } finally {
         await db.delete(journalEntries).where(eq(journalEntries.id, emptyJeId));
@@ -4445,7 +4514,12 @@ describe('Kanakku MCP Server Integration Suite', () => {
             method: 'tools/call',
             params: {
               name: 'close_month',
-              arguments: { month, year, step: 'reconcile', payload: { allow_general_expense: true } },
+              arguments: {
+                month,
+                year,
+                step: 'reconcile',
+                payload: { allow_general_expense: true },
+              },
             },
           },
           { sessionId: testSessionId, protocolVersion: '2025-11-25' },
@@ -4508,7 +4582,10 @@ describe('Kanakku MCP Server Integration Suite', () => {
               jsonrpc: '2.0',
               id: 8043,
               method: 'tools/call',
-              params: { name: 'confirm_action', arguments: { confirmation_token: generated.tokenSecret } },
+              params: {
+                name: 'confirm_action',
+                arguments: { confirmation_token: generated.tokenSecret },
+              },
             },
             { sessionId: testSessionId, protocolVersion: '2025-11-25' },
           );
@@ -4516,7 +4593,9 @@ describe('Kanakku MCP Server Integration Suite', () => {
           expect(confirmErr).toContain('JOURNAL_AMOUNT_MISMATCH_DETECTED');
           expect(confirmErr).toContain('JE-202610-WRONG-AMOUNT');
         } finally {
-          await db.delete(pendingConfirmations).where(eq(pendingConfirmations.tokenHash, generated.tokenHash));
+          await db
+            .delete(pendingConfirmations)
+            .where(eq(pendingConfirmations.tokenHash, generated.tokenHash));
         }
       } finally {
         await db.delete(journalLines).where(eq(journalLines.journalEntryId, mismatchJeId));
@@ -4642,7 +4721,12 @@ describe('Kanakku MCP Server Integration Suite', () => {
             method: 'tools/call',
             params: {
               name: 'close_month',
-              arguments: { month, year, step: 'reconcile', payload: { allow_general_expense: true } },
+              arguments: {
+                month,
+                year,
+                step: 'reconcile',
+                payload: { allow_general_expense: true },
+              },
             },
           },
           { sessionId: testSessionId, protocolVersion: '2025-11-25' },
@@ -4669,10 +4753,7 @@ describe('Kanakku MCP Server Integration Suite', () => {
           .where(eq(expenseCategories.businessId, 'b0000000-0000-0000-0000-000000000001'))
           .limit(1);
 
-        await db
-          .update(expenses)
-          .set({ categoryId: cat!.id })
-          .where(eq(expenses.id, expId));
+        await db.update(expenses).set({ categoryId: cat!.id }).where(eq(expenses.id, expId));
 
         // 5. Attempt confirm_action: must detect stale categorisation state and reject
         const confirmRes = await mcpPost(
@@ -4680,7 +4761,10 @@ describe('Kanakku MCP Server Integration Suite', () => {
             jsonrpc: '2.0',
             id: 8013,
             method: 'tools/call',
-            params: { name: 'confirm_action', arguments: { confirmation_token: confirmationToken } },
+            params: {
+              name: 'confirm_action',
+              arguments: { confirmation_token: confirmationToken },
+            },
           },
           { sessionId: testSessionId, protocolVersion: '2025-11-25' },
         );
@@ -5752,7 +5836,9 @@ describe('Kanakku MCP Server Integration Suite', () => {
 
       // GST status calculation must use IST calendar month
       const istMonth = parseInt(
-        new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', month: 'numeric' }).format(now),
+        new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', month: 'numeric' }).format(
+          now,
+        ),
         10,
       );
       expect(briefData.gst_status.month).toBe(istMonth);
@@ -5901,4 +5987,3 @@ describe('Kanakku MCP Server Integration Suite', () => {
     });
   });
 });
-

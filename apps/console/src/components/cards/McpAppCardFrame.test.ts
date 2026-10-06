@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 
 describe('McpAppCardFrame Protocol & Bridge Test', () => {
-
   it('implements JSON-RPC 2.0 handshake and tool result delivery', async () => {
     const parentMessages: any[] = [];
     const iframeMessages: any[] = [];

@@ -103,7 +103,10 @@ export function computeFinancialDelta(currentPaise: bigint, previousPaise: bigin
 
   if (previousPaise !== 0n) {
     // basis points calculation: (delta * 10,000) / previous
-    const bpsBigInt = roundHalfUp(deltaPaise * 10000n, previousPaise > 0n ? previousPaise : -previousPaise);
+    const bpsBigInt = roundHalfUp(
+      deltaPaise * 10000n,
+      previousPaise > 0n ? previousPaise : -previousPaise,
+    );
     percentageChangeBps = Number(bpsBigInt);
 
     const absBps = Math.abs(percentageChangeBps);
@@ -163,7 +166,9 @@ export function detectCategorySurges(
     const isNewSurge = cat.previousAmountPaise === 0n && isNominalSurge;
 
     if ((isPercentageSurge && isNominalSurge) || isNewSurge) {
-      const pctText = delta.percentageChangeFormatted ? ` (${delta.percentageChangeFormatted})` : '';
+      const pctText = delta.percentageChangeFormatted
+        ? ` (${delta.percentageChangeFormatted})`
+        : '';
       const refs: UnderlyingReference[] = [
         {
           entityType: 'category',
@@ -284,11 +289,18 @@ export function evaluateFinancialMacroInsights(input: {
   // 1. Revenue Shift
   const revDelta = computeFinancialDelta(input.currentRevenuePaise, input.previousRevenuePaise);
   if (revDelta.deltaPaise !== 0n) {
-    const pct = revDelta.percentageChangeFormatted ? ` (${revDelta.percentageChangeFormatted})` : '';
+    const pct = revDelta.percentageChangeFormatted
+      ? ` (${revDelta.percentageChangeFormatted})`
+      : '';
     insights.push({
       id: 'macro-revenue-shift',
       type: 'revenue_shift',
-      severity: revDelta.direction === 'decreased' && revDelta.percentageChangeBps && revDelta.percentageChangeBps <= -1500 ? 'warning' : 'info',
+      severity:
+        revDelta.direction === 'decreased' &&
+        revDelta.percentageChangeBps &&
+        revDelta.percentageChangeBps <= -1500
+          ? 'warning'
+          : 'info',
       title: `Billed revenue ${revDelta.direction}${pct}`,
       description: `Revenue ${revDelta.direction} by ${revDelta.formattedDelta} from ${revDelta.formattedPrevious} to ${revDelta.formattedCurrent}${pct}.`,
       direction: revDelta.direction,
@@ -307,11 +319,18 @@ export function evaluateFinancialMacroInsights(input: {
   // 2. Expense Shift
   const expDelta = computeFinancialDelta(input.currentExpensesPaise, input.previousExpensesPaise);
   if (expDelta.deltaPaise !== 0n) {
-    const pct = expDelta.percentageChangeFormatted ? ` (${expDelta.percentageChangeFormatted})` : '';
+    const pct = expDelta.percentageChangeFormatted
+      ? ` (${expDelta.percentageChangeFormatted})`
+      : '';
     insights.push({
       id: 'macro-expense-shift',
       type: 'expense_shift',
-      severity: expDelta.direction === 'increased' && expDelta.percentageChangeBps && expDelta.percentageChangeBps >= 2000 ? 'warning' : 'info',
+      severity:
+        expDelta.direction === 'increased' &&
+        expDelta.percentageChangeBps &&
+        expDelta.percentageChangeBps >= 2000
+          ? 'warning'
+          : 'info',
       title: `Total expenses ${expDelta.direction}${pct}`,
       description: `Expenses ${expDelta.direction} by ${expDelta.formattedDelta} from ${expDelta.formattedPrevious} to ${expDelta.formattedCurrent}${pct}.`,
       direction: expDelta.direction,
@@ -328,9 +347,14 @@ export function evaluateFinancialMacroInsights(input: {
   }
 
   // 3. GST Liability Shift
-  const gstDelta = computeFinancialDelta(input.currentGstPayablePaise, input.previousGstPayablePaise);
+  const gstDelta = computeFinancialDelta(
+    input.currentGstPayablePaise,
+    input.previousGstPayablePaise,
+  );
   if (gstDelta.deltaPaise !== 0n) {
-    const pct = gstDelta.percentageChangeFormatted ? ` (${gstDelta.percentageChangeFormatted})` : '';
+    const pct = gstDelta.percentageChangeFormatted
+      ? ` (${gstDelta.percentageChangeFormatted})`
+      : '';
     insights.push({
       id: 'macro-gst-shift',
       type: 'gst_liability_shift',

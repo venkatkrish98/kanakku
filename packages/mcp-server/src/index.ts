@@ -33,7 +33,8 @@ if (isDirectCli) {
 
   // Start background audit anchor outbox worker (ADR-005)
   // Sweeps pending/failed audit anchors on boot and periodically every 30s
-  let outboxWorker: ReturnType<typeof import('./audit/outbox.js').startAuditOutboxWorker> | null = null;
+  let outboxWorker: ReturnType<typeof import('./audit/outbox.js').startAuditOutboxWorker> | null =
+    null;
   if (process.env['AUDIT_OUTBOX_WORKER_ENABLED'] !== 'false') {
     const pollIntervalMs = parseInt(process.env['AUDIT_OUTBOX_POLL_INTERVAL_MS'] ?? '30000', 10);
     const { startAuditOutboxWorker } = await import('./audit/outbox.js');
@@ -41,7 +42,9 @@ if (isDirectCli) {
       intervalMs: pollIntervalMs,
       onSweep: (res) => {
         if (res.total > 0) {
-          console.log(`[AuditOutboxWorker] Swept ${res.total} items: ${res.succeeded} anchored, ${res.failed} failed`);
+          console.log(
+            `[AuditOutboxWorker] Swept ${res.total} items: ${res.succeeded} anchored, ${res.failed} failed`,
+          );
         }
       },
       onError: (err) => {

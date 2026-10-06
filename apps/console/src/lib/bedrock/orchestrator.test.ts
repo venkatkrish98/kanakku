@@ -218,7 +218,10 @@ describe('VoiceOrchestrator & Deterministic Intent Engine (Phase 4 Hardened)', (
 
     const response = await orchestrator.processTurn(req);
 
-    expect(mockMcpClient.cancelAction).toHaveBeenCalledWith('test_token_exp_999', 'Cancelled via voice');
+    expect(mockMcpClient.cancelAction).toHaveBeenCalledWith(
+      'test_token_exp_999',
+      'Cancelled via voice',
+    );
     expect(response.actionRequired).toBe('none');
     expect(response.spokenResponse).toContain('Cancelled');
   });
@@ -309,10 +312,17 @@ describe('VoiceOrchestrator & Deterministic Intent Engine (Phase 4 Hardened)', (
 
       // Turn 2: User responds to clarification approving general expenses
       const catResult: McpToolCallResult = {
-        content: [{ type: 'text', text: JSON.stringify({ step: 'categorise', allow_general_expense: true }) }],
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({ step: 'categorise', allow_general_expense: true }),
+          },
+        ],
       };
       const recResult: McpToolCallResult = {
-        content: [{ type: 'text', text: JSON.stringify({ step: 'reconcile', ledger_balanced: true }) }],
+        content: [
+          { type: 'text', text: JSON.stringify({ step: 'reconcile', ledger_balanced: true }) },
+        ],
       };
       const prepResult: McpToolCallResult = {
         content: [
@@ -428,7 +438,9 @@ describe('VoiceOrchestrator & Deterministic Intent Engine (Phase 4 Hardened)', (
         ],
       };
       const recResult: McpToolCallResult = {
-        content: [{ type: 'text', text: JSON.stringify({ step: 'reconcile', ledger_balanced: true }) }],
+        content: [
+          { type: 'text', text: JSON.stringify({ step: 'reconcile', ledger_balanced: true }) },
+        ],
       };
       const prepResult: McpToolCallResult = {
         content: [
@@ -551,7 +563,8 @@ describe('VoiceOrchestrator & Deterministic Intent Engine (Phase 4 Hardened)', (
               outflow_formatted: '₹50,000.00',
               net_cashflow_formatted: '₹1,50,000.00',
               comparison: {
-                comparison_summary: 'Net cashflow increased by ₹50,000.00 compared to preceding period.',
+                comparison_summary:
+                  'Net cashflow increased by ₹50,000.00 compared to preceding period.',
               },
             }),
           },
@@ -606,9 +619,11 @@ describe('VoiceOrchestrator & Deterministic Intent Engine (Phase 4 Hardened)', (
           {
             type: 'text',
             text: JSON.stringify({
-              voice_summary: 'This expense for Acme Office has been verified in the double-entry ledger. Total debits and credits equal ₹2,400.00.',
+              voice_summary:
+                'This expense for Acme Office has been verified in the double-entry ledger. Total debits and credits equal ₹2,400.00.',
               accounting_explanation: {
-                summary: 'Business expense for office supplies. Debited Expense Account and credited Bank.',
+                summary:
+                  'Business expense for office supplies. Debited Expense Account and credited Bank.',
               },
             }),
           },

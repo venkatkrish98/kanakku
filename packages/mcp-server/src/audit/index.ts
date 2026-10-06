@@ -4,8 +4,7 @@ import type { KanakkuDatabase } from '@kanakku/db';
 import { auditLogs } from '@kanakku/db';
 import { computeAuditEntryHash, hashPayload } from '@kanakku/core';
 
-export const GENESIS_PREV_HASH =
-  '0000000000000000000000000000000000000000000000000000000000000000';
+export const GENESIS_PREV_HASH = '0000000000000000000000000000000000000000000000000000000000000000';
 
 export interface AppendAuditLogParams {
   businessId: string;
@@ -257,4 +256,3 @@ export async function verifyAuditChain(
 
 export * from './anchor.js';
 export * from './outbox.js';
-

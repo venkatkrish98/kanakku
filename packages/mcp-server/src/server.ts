@@ -30,7 +30,7 @@ export interface McpSession {
 export class McpSessionManager {
   private sessions = new Map<string, McpSession>();
 
-  constructor(private db: KanakkuDatabase) { }
+  constructor(private db: KanakkuDatabase) {}
 
   public createSession(tenantContext: AuthenticatedTenantContext): McpSession {
     const sessionId = randomUUID();
@@ -86,7 +86,7 @@ export class McpSessionManager {
     let cleaned = 0;
     for (const [id, session] of this.sessions.entries()) {
       if (now - session.lastActiveAt > ttlMs) {
-        session.transport.close().catch(() => { });
+        session.transport.close().catch(() => {});
         this.sessions.delete(id);
         cleaned++;
       }
@@ -97,7 +97,7 @@ export class McpSessionManager {
   public closeSession(sessionId: string): void {
     const session = this.sessions.get(sessionId);
     if (session) {
-      session.transport.close().catch(() => { });
+      session.transport.close().catch(() => {});
       this.sessions.delete(sessionId);
     }
   }
@@ -135,9 +135,11 @@ export interface HttpServerOptions {
 export function createHttpServer(options: HttpServerOptions = {}) {
   const db = options.db ?? getDatabase();
   const sessionManager = new McpSessionManager(db);
-  const allowedOrigins = options.allowedOrigins ?? (
-    process.env.ALLOWED_ORIGINS || 'http://localhost:3000,http://127.0.0.1:3000'
-  ).split(',').map((s) => s.trim());
+  const allowedOrigins =
+    options.allowedOrigins ??
+    (process.env.ALLOWED_ORIGINS || 'http://localhost:3000,http://127.0.0.1:3000')
+      .split(',')
+      .map((s) => s.trim());
 
   const server = http.createServer(async (req, res) => {
     // 1. CORS Headers with origin restriction
@@ -151,7 +153,10 @@ export function createHttpServer(options: HttpServerOptions = {}) {
       'Content-Type, Accept, Authorization, X-Tenant-Key, Mcp-Session-Id, Mcp-Protocol-Version, Last-Event-ID, X-Mcp-Ui-Support',
     );
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Expose-Headers', 'Mcp-Session-Id, Mcp-Protocol-Version, X-Mcp-Ui-Support');
+    res.setHeader(
+      'Access-Control-Expose-Headers',
+      'Mcp-Session-Id, Mcp-Protocol-Version, X-Mcp-Ui-Support',
+    );
 
     if (req.method === 'OPTIONS') {
       res.writeHead(204);
@@ -194,7 +199,9 @@ export function createHttpServer(options: HttpServerOptions = {}) {
 
         let tokenToVerify = '';
         if (authHeader) {
-          tokenToVerify = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : authHeader.trim();
+          tokenToVerify = authHeader.startsWith('Bearer ')
+            ? authHeader.slice(7).trim()
+            : authHeader.trim();
         }
 
         if (!tokenToVerify) {
@@ -202,7 +209,8 @@ export function createHttpServer(options: HttpServerOptions = {}) {
           res.end(
             JSON.stringify({
               error: 'UNAUTHENTICATED',
-              message: 'Authentication required. Provide "Authorization: Bearer <secretKey>" or "X-Tenant-Key" header.',
+              message:
+                'Authentication required. Provide "Authorization: Bearer <secretKey>" or "X-Tenant-Key" header.',
             }),
           );
           return;
@@ -315,11 +323,15 @@ export function createHttpServer(options: HttpServerOptions = {}) {
         const authHeader = req.headers['authorization'] ?? (req.headers['x-tenant-key'] as string);
         let tokenToVerify = '';
         if (authHeader) {
-          tokenToVerify = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : authHeader.trim();
+          tokenToVerify = authHeader.startsWith('Bearer ')
+            ? authHeader.slice(7).trim()
+            : authHeader.trim();
         }
 
         const sessionIdHeader = req.headers['mcp-session-id'] as string | undefined;
-        const activeSession = sessionIdHeader ? sessionManager.getSession(sessionIdHeader) : undefined;
+        const activeSession = sessionIdHeader
+          ? sessionManager.getSession(sessionIdHeader)
+          : undefined;
         let tenantContext: AuthenticatedTenantContext | undefined = activeSession?.tenantContext;
 
         if (!tenantContext && tokenToVerify) {
@@ -334,7 +346,8 @@ export function createHttpServer(options: HttpServerOptions = {}) {
               id: null,
               error: {
                 code: -32000,
-                message: 'Authentication required. Provide "Authorization: Bearer <secretKey>", "X-Tenant-Key", or valid "mcp-session-id" header.',
+                message:
+                  'Authentication required. Provide "Authorization: Bearer <secretKey>", "X-Tenant-Key", or valid "mcp-session-id" header.',
               },
             }),
           );
@@ -344,13 +357,15 @@ export function createHttpServer(options: HttpServerOptions = {}) {
         // SECURITY (SSRF Prevention):
         // Enforce trusted loopback address; NEVER forward credentials to a URL derived from request headers.
         const addr = server.address();
-        const activePort =
-          options.port ?? (addr && typeof addr === 'object' ? addr.port : 3001);
+        const activePort = options.port ?? (addr && typeof addr === 'object' ? addr.port : 3001);
         const serverUrl = options.serverUrl ?? `http://127.0.0.1:${activePort}`;
 
         let activeSessionId = sessionIdHeader;
         if (!activeSessionId) {
-          const userSession = sessionManager.findSessionForUser(tenantContext.businessId, tenantContext.userId);
+          const userSession = sessionManager.findSessionForUser(
+            tenantContext.businessId,
+            tenantContext.userId,
+          );
           if (userSession) {
             activeSessionId = userSession.sessionId;
           }
@@ -411,7 +426,9 @@ export function createHttpServer(options: HttpServerOptions = {}) {
       const authHeader = req.headers['authorization'] ?? (req.headers['x-tenant-key'] as string);
       let tokenToVerify = '';
       if (authHeader) {
-        tokenToVerify = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : authHeader.trim();
+        tokenToVerify = authHeader.startsWith('Bearer ')
+          ? authHeader.slice(7).trim()
+          : authHeader.trim();
       }
 
       const sessionIdHeader = (req.headers['mcp-session-id'] as string) || '';
@@ -438,7 +455,8 @@ export function createHttpServer(options: HttpServerOptions = {}) {
         res.end(
           JSON.stringify({
             error: 'UNAUTHENTICATED',
-            message: 'Authentication required to access host harness. Provide "Authorization: Bearer <token>" or "mcp-session-id" header.',
+            message:
+              'Authentication required to access host harness. Provide "Authorization: Bearer <token>" or "mcp-session-id" header.',
           }),
         );
         return;
@@ -446,7 +464,10 @@ export function createHttpServer(options: HttpServerOptions = {}) {
 
       // Establish or reuse active ephemeral session for this user (never exposing secret API key in HTML)
       if (!activeSession) {
-        activeSession = sessionManager.findSessionForUser(tenantContext.businessId, tenantContext.userId);
+        activeSession = sessionManager.findSessionForUser(
+          tenantContext.businessId,
+          tenantContext.userId,
+        );
         if (!activeSession) {
           activeSession = sessionManager.createSession(tenantContext);
         }
@@ -457,9 +478,10 @@ export function createHttpServer(options: HttpServerOptions = {}) {
       const draftId = url.searchParams.get('draft_id');
       // SECURITY: Confirmation tokens authorize critical actions and MUST NEVER be accepted in URL query parameters.
       // Accept confirmation token strictly via protected header.
-      const confirmationToken = (
-        (req.headers['x-confirmation-token'] ?? req.headers['confirmation-token']) as string
-      )?.trim() || '';
+      const confirmationToken =
+        (
+          (req.headers['x-confirmation-token'] ?? req.headers['confirmation-token']) as string
+        )?.trim() || '';
 
       let initialToolResult: Record<string, unknown> | null = null;
       if (draftId || confirmationToken) {
@@ -480,7 +502,10 @@ export function createHttpServer(options: HttpServerOptions = {}) {
           });
 
           if (query) {
-            const draftPayload = (query.payload && typeof query.payload === 'object') ? (query.payload as Record<string, unknown>) : {};
+            const draftPayload =
+              query.payload && typeof query.payload === 'object'
+                ? (query.payload as Record<string, unknown>)
+                : {};
             initialToolResult = {
               draft_id: query.id,
               confirmation_token: confirmationToken || undefined,

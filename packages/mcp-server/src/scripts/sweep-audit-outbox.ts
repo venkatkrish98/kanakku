@@ -19,7 +19,9 @@ async function main() {
       intervalMs: 30_000,
       onSweep: (res) => {
         if (res.total > 0) {
-          console.log(`[AuditOutboxWorker] Swept ${res.total} items: ${res.succeeded} anchored, ${res.failed} failed`);
+          console.log(
+            `[AuditOutboxWorker] Swept ${res.total} items: ${res.succeeded} anchored, ${res.failed} failed`,
+          );
         }
       },
       onError: (err) => {
@@ -39,7 +41,9 @@ async function main() {
   } else {
     console.log('[AuditOutbox] Running one-shot sweep of pending/failed audit anchors...');
     const result = await processPendingAuditOutbox(db);
-    console.log(`[AuditOutbox] Sweep complete. Processed: ${result.total}, Succeeded: ${result.succeeded}, Failed: ${result.failed}`);
+    console.log(
+      `[AuditOutbox] Sweep complete. Processed: ${result.total}, Succeeded: ${result.succeeded}, Failed: ${result.failed}`,
+    );
     await closeDatabase();
     process.exit(result.failed > 0 ? 1 : 0);
   }

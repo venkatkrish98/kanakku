@@ -40,14 +40,12 @@ export async function POST(req: NextRequest) {
       tenantContext = await authenticateToken(token, db);
     } catch (authErr: unknown) {
       const msg = authErr instanceof Error ? authErr.message : 'Invalid credentials';
-      return NextResponse.json(
-        { success: false, error: `UNAUTHORIZED: ${msg}` },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: `UNAUTHORIZED: ${msg}` }, { status: 401 });
     }
 
     const body = await req.json();
-    const { transcript, conversationHistory, pendingToken, action, confirmationToken, reason } = body;
+    const { transcript, conversationHistory, pendingToken, action, confirmationToken, reason } =
+      body;
 
     // Construct MCP client strictly bound to the authenticated caller's verified token
     const mcpClient = new McpHttpClient({
@@ -71,7 +69,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         spokenResponse: 'Transaction confirmed and posted to the double-entry books.',
-        toolCalls: [{ name: 'confirm_action', args: { confirmation_token: confirmationToken }, result }],
+        toolCalls: [
+          { name: 'confirm_action', args: { confirmation_token: confirmationToken }, result },
+        ],
         actionRequired: 'none',
       });
     }
@@ -84,18 +84,26 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const result = await mcpClient.cancelAction(confirmationToken, reason || 'Cancelled by authenticated user');
+      const result = await mcpClient.cancelAction(
+        confirmationToken,
+        reason || 'Cancelled by authenticated user',
+      );
       return NextResponse.json({
         success: true,
         spokenResponse: 'Draft cancelled and discarded. Books are untouched.',
-        toolCalls: [{ name: 'cancel_action', args: { confirmation_token: confirmationToken }, result }],
+        toolCalls: [
+          { name: 'cancel_action', args: { confirmation_token: confirmationToken }, result },
+        ],
         actionRequired: 'none',
       });
     }
 
     // 3. Voice Turn Processing & Input Validation
     if (!transcript || typeof transcript !== 'string') {
-      return NextResponse.json({ success: false, error: 'Missing or invalid transcript' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Missing or invalid transcript' },
+        { status: 400 },
+      );
     }
 
     if (transcript.length > 1000) {
@@ -127,7 +135,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Sanitize conversation history: bound size to 10 items, truncate content to 500 chars
-    const sanitizedHistory: Array<{ role: 'user' | 'assistant'; content: string }> = Array.isArray(conversationHistory)
+    const sanitizedHistory: Array<{ role: 'user' | 'assistant'; content: string }> = Array.isArray(
+      conversationHistory,
+    )
       ? conversationHistory.slice(-10).map((item) => ({
           role: item.role === 'assistant' ? 'assistant' : 'user',
           content: String(item.content || '').slice(0, 500),

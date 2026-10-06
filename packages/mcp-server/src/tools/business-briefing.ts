@@ -1,7 +1,14 @@
 import { z } from 'zod';
 import { eq, and, gte, lte, lt, inArray } from 'drizzle-orm';
 import type { KanakkuDatabase } from '@kanakku/db';
-import { invoices, payments, expenses, customers, expenseCategories, businessMemory } from '@kanakku/db';
+import {
+  invoices,
+  payments,
+  expenses,
+  customers,
+  expenseCategories,
+  businessMemory,
+} from '@kanakku/db';
 import {
   formatInr,
   calculateAgeingBucket,
@@ -184,8 +191,12 @@ export async function handleGetBusinessBriefing(
   // 7. Compose Concise Voice Summary (Strictly <= 2 Sentences for Alexa+ TTS)
   const inflowFormatted = formatInr(cashInflowPaise);
   const overdueFormatted = formatInr(overdueReceivablesPaise);
-  const voiceInflow = cashInflowPaise % 100n === 0n ? inflowFormatted.replace(/\.00$/, '') : inflowFormatted;
-  const voiceOverdue = overdueReceivablesPaise % 100n === 0n ? overdueFormatted.replace(/\.00$/, '') : overdueFormatted;
+  const voiceInflow =
+    cashInflowPaise % 100n === 0n ? inflowFormatted.replace(/\.00$/, '') : inflowFormatted;
+  const voiceOverdue =
+    overdueReceivablesPaise % 100n === 0n
+      ? overdueFormatted.replace(/\.00$/, '')
+      : overdueFormatted;
 
   let voiceSummary = '';
   if (cashInflowPaise > 0n && overdueReceivablesPaise > 0n) {

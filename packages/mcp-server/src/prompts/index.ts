@@ -71,7 +71,7 @@ Steps:
   // 3. business_briefing
   server.prompt(
     'business_briefing',
-    'On-demand daily financial pulse check summarizing today\'s activity and urgent alerts.',
+    "On-demand daily financial pulse check summarizing today's activity and urgent alerts.",
     {},
     async () => {
       const tenant = getTenantContext();

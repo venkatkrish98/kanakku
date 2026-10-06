@@ -28,8 +28,7 @@ export async function handleGetGstLiability(
   const prevYear = month === 1 ? year - 1 : year;
   const prevLiability = await computeMonthGst(db, businessId, prevMonth, prevYear);
 
-  const momDeltaPaise =
-    currentLiability.netPayableTotalPaise - prevLiability.netPayableTotalPaise;
+  const momDeltaPaise = currentLiability.netPayableTotalPaise - prevLiability.netPayableTotalPaise;
 
   const response = {
     period: `${year}-${month.toString().padStart(2, '0')}`,

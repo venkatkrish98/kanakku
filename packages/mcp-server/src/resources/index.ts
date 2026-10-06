@@ -28,219 +28,204 @@ import { MCP_APP_MIME_TYPE } from '../apps/index.js';
 
 export function registerResources(server: McpServer, db: KanakkuDatabase) {
   // 1. kanakku://business-summary
-  server.resource(
-    'business-summary',
-    'kanakku://business-summary',
-    async (uri) => {
-      const tenant = getTenantContext();
-      const businessId = tenant.businessId;
+  server.resource('business-summary', 'kanakku://business-summary', async (uri) => {
+    const tenant = getTenantContext();
+    const businessId = tenant.businessId;
 
-      // Active customer count
-      const customerRows = await db
-        .select({ count: sql<number>`count(*)::int` })
-        .from(customers)
-        .where(eq(customers.businessId, businessId));
-      const customerCount = customerRows[0]?.count ?? 0;
+    // Active customer count
+    const customerRows = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(customers)
+      .where(eq(customers.businessId, businessId));
+    const customerCount = customerRows[0]?.count ?? 0;
 
-      // Total uncollected receivables
-      const openInvoices = await db
-        .select({
-          totalPaise: invoices.totalPaise,
-          paidAmountPaise: invoices.paidAmountPaise,
-        })
-        .from(invoices)
-        .where(
-          and(
-            eq(invoices.businessId, businessId),
-            inArray(invoices.status, ['issued', 'partially_paid']),
-          ),
-        );
+    // Total uncollected receivables
+    const openInvoices = await db
+      .select({
+        totalPaise: invoices.totalPaise,
+        paidAmountPaise: invoices.paidAmountPaise,
+      })
+      .from(invoices)
+      .where(
+        and(
+          eq(invoices.businessId, businessId),
+          inArray(invoices.status, ['issued', 'partially_paid']),
+        ),
+      );
 
-      let totalOutstandingPaise = 0n;
-      for (const inv of openInvoices) {
-        totalOutstandingPaise += inv.totalPaise - inv.paidAmountPaise;
-      }
+    let totalOutstandingPaise = 0n;
+    for (const inv of openInvoices) {
+      totalOutstandingPaise += inv.totalPaise - inv.paidAmountPaise;
+    }
 
-      // Total YTD billed revenue
-      const allInvoices = await db
-        .select({ subtotalPaise: invoices.subtotalPaise })
-        .from(invoices)
-        .where(
-          and(
-            eq(invoices.businessId, businessId),
-            sql`${invoices.status} != 'cancelled'`,
-          ),
-        );
+    // Total YTD billed revenue
+    const allInvoices = await db
+      .select({ subtotalPaise: invoices.subtotalPaise })
+      .from(invoices)
+      .where(and(eq(invoices.businessId, businessId), sql`${invoices.status} != 'cancelled'`));
 
-      let totalRevenuePaise = 0n;
-      for (const inv of allInvoices) {
-        totalRevenuePaise += inv.subtotalPaise;
-      }
+    let totalRevenuePaise = 0n;
+    for (const inv of allInvoices) {
+      totalRevenuePaise += inv.subtotalPaise;
+    }
 
-      const summary = {
-        business_id: tenant.business.id,
-        name: tenant.business.name,
-        legal_name: tenant.business.legalName,
-        gstin: tenant.business.gstin,
-        state_code: tenant.business.stateCode,
-        currency: tenant.business.currency,
-        financial_year_start_month: tenant.business.financialYearStartMonth,
-        active_customers_count: customerCount,
-        total_outstanding_receivables: formatInr(totalOutstandingPaise),
-        total_ytd_billed_revenue: formatInr(totalRevenuePaise),
-      };
+    const summary = {
+      business_id: tenant.business.id,
+      name: tenant.business.name,
+      legal_name: tenant.business.legalName,
+      gstin: tenant.business.gstin,
+      state_code: tenant.business.stateCode,
+      currency: tenant.business.currency,
+      financial_year_start_month: tenant.business.financialYearStartMonth,
+      active_customers_count: customerCount,
+      total_outstanding_receivables: formatInr(totalOutstandingPaise),
+      total_ytd_billed_revenue: formatInr(totalRevenuePaise),
+    };
 
-      return {
-        contents: [
-          {
-            uri: uri.toString(),
-            mimeType: 'application/json',
-            text: JSON.stringify(summary, null, 2),
-          },
-        ],
-      };
-    },
-  );
+    return {
+      contents: [
+        {
+          uri: uri.toString(),
+          mimeType: 'application/json',
+          text: JSON.stringify(summary, null, 2),
+        },
+      ],
+    };
+  });
 
   // 2. kanakku://chart-of-accounts
-  server.resource(
-    'chart-of-accounts',
-    'kanakku://chart-of-accounts',
-    async (uri) => {
-      const tenant = getTenantContext();
-      const accounts = await db
-        .select({
-          code: chartOfAccounts.code,
-          name: chartOfAccounts.name,
-          type: chartOfAccounts.type,
-        })
-        .from(chartOfAccounts)
-        .where(eq(chartOfAccounts.businessId, tenant.businessId))
-        .orderBy(chartOfAccounts.code);
+  server.resource('chart-of-accounts', 'kanakku://chart-of-accounts', async (uri) => {
+    const tenant = getTenantContext();
+    const accounts = await db
+      .select({
+        code: chartOfAccounts.code,
+        name: chartOfAccounts.name,
+        type: chartOfAccounts.type,
+      })
+      .from(chartOfAccounts)
+      .where(eq(chartOfAccounts.businessId, tenant.businessId))
+      .orderBy(chartOfAccounts.code);
 
-      return {
-        contents: [
-          {
-            uri: uri.toString(),
-            mimeType: 'application/json',
-            text: JSON.stringify({ chart_of_accounts: accounts }, null, 2),
-          },
-        ],
-      };
-    },
-  );
+    return {
+      contents: [
+        {
+          uri: uri.toString(),
+          mimeType: 'application/json',
+          text: JSON.stringify({ chart_of_accounts: accounts }, null, 2),
+        },
+      ],
+    };
+  });
 
   // 3. kanakku://gst-rates
-  server.resource(
-    'gst-rates',
-    'kanakku://gst-rates',
-    async (uri) => {
-      const gstSchedule = {
-        standard_slabs: [
-          { rate_bps: 0, percentage: '0%', description: 'Exempted goods and essential food items' },
-          { rate_bps: 500, percentage: '5%', description: 'Household necessities and transport services' },
-          { rate_bps: 1200, percentage: '12%', description: 'Standard consumer products and IT equipment' },
-          { rate_bps: 1800, percentage: '18%', description: 'Most commercial and professional IT/design services' },
-          { rate_bps: 2800, percentage: '28%', description: 'Luxury items and demerit goods' },
-        ],
-        rules: {
-          intra_state: 'Equal 50-50 division between CGST and SGST',
-          inter_state: '100% IGST applied',
-          rounding_policy: 'Component-primary rounding convention (CGST and SGST rounded first, total sum of components)',
-          statutory_reference: 'Central Goods and Services Tax Act, 2017 (Section 49)',
+  server.resource('gst-rates', 'kanakku://gst-rates', async (uri) => {
+    const gstSchedule = {
+      standard_slabs: [
+        { rate_bps: 0, percentage: '0%', description: 'Exempted goods and essential food items' },
+        {
+          rate_bps: 500,
+          percentage: '5%',
+          description: 'Household necessities and transport services',
         },
-      };
+        {
+          rate_bps: 1200,
+          percentage: '12%',
+          description: 'Standard consumer products and IT equipment',
+        },
+        {
+          rate_bps: 1800,
+          percentage: '18%',
+          description: 'Most commercial and professional IT/design services',
+        },
+        { rate_bps: 2800, percentage: '28%', description: 'Luxury items and demerit goods' },
+      ],
+      rules: {
+        intra_state: 'Equal 50-50 division between CGST and SGST',
+        inter_state: '100% IGST applied',
+        rounding_policy:
+          'Component-primary rounding convention (CGST and SGST rounded first, total sum of components)',
+        statutory_reference: 'Central Goods and Services Tax Act, 2017 (Section 49)',
+      },
+    };
 
-      return {
-        contents: [
-          {
-            uri: uri.toString(),
-            mimeType: 'application/json',
-            text: JSON.stringify(gstSchedule, null, 2),
-          },
-        ],
-      };
-    },
-  );
+    return {
+      contents: [
+        {
+          uri: uri.toString(),
+          mimeType: 'application/json',
+          text: JSON.stringify(gstSchedule, null, 2),
+        },
+      ],
+    };
+  });
 
   // 4. kanakku://audit-trail
-  server.resource(
-    'audit-trail',
-    'kanakku://audit-trail',
-    async (uri) => {
-      const tenant = getTenantContext();
-      const verification = await verifyAuditChain(tenant.businessId, db);
+  server.resource('audit-trail', 'kanakku://audit-trail', async (uri) => {
+    const tenant = getTenantContext();
+    const verification = await verifyAuditChain(tenant.businessId, db);
 
-      const latestLog = await db
-        .select({
-          sequenceNumber: auditLogs.sequenceNumber,
-          action: auditLogs.action,
-          entryHash: auditLogs.entryHash,
-          createdAt: auditLogs.createdAt,
-        })
-        .from(auditLogs)
-        .where(eq(auditLogs.businessId, tenant.businessId))
-        .orderBy(sql`${auditLogs.sequenceNumber} DESC`)
-        .limit(1);
+    const latestLog = await db
+      .select({
+        sequenceNumber: auditLogs.sequenceNumber,
+        action: auditLogs.action,
+        entryHash: auditLogs.entryHash,
+        createdAt: auditLogs.createdAt,
+      })
+      .from(auditLogs)
+      .where(eq(auditLogs.businessId, tenant.businessId))
+      .orderBy(sql`${auditLogs.sequenceNumber} DESC`)
+      .limit(1);
 
-      const auditTrailSummary = {
-        chain_valid: verification.valid,
-        total_entries: verification.totalEntries,
-        head_sequence: verification.headSequence?.toString() ?? null,
-        head_hash: verification.headHash,
-        latest_action: latestLog[0]?.action ?? null,
-        latest_timestamp: latestLog[0]?.createdAt.toISOString() ?? null,
-        error: verification.error ?? null,
-      };
+    const auditTrailSummary = {
+      chain_valid: verification.valid,
+      total_entries: verification.totalEntries,
+      head_sequence: verification.headSequence?.toString() ?? null,
+      head_hash: verification.headHash,
+      latest_action: latestLog[0]?.action ?? null,
+      latest_timestamp: latestLog[0]?.createdAt.toISOString() ?? null,
+      error: verification.error ?? null,
+    };
 
-      return {
-        contents: [
-          {
-            uri: uri.toString(),
-            mimeType: 'application/json',
-            text: JSON.stringify(auditTrailSummary, null, 2),
-          },
-        ],
-      };
-    },
-  );
+    return {
+      contents: [
+        {
+          uri: uri.toString(),
+          mimeType: 'application/json',
+          text: JSON.stringify(auditTrailSummary, null, 2),
+        },
+      ],
+    };
+  });
 
   // 5. kanakku://business-memory
-  server.resource(
-    'business-memory',
-    'kanakku://business-memory',
-    async (uri) => {
-      const tenant = getTenantContext();
-      const memories = await db
-        .select({
-          id: businessMemory.id,
-          category: businessMemory.category,
-          entityKey: businessMemory.entityKey,
-          memoryValue: businessMemory.memoryValue,
-          confidence: businessMemory.confidence,
-          source: businessMemory.source,
-          isActive: businessMemory.isActive,
-          updatedAt: businessMemory.updatedAt,
-        })
-        .from(businessMemory)
-        .where(
-          and(
-            eq(businessMemory.businessId, tenant.businessId),
-            eq(businessMemory.isActive, true),
-          ),
-        );
+  server.resource('business-memory', 'kanakku://business-memory', async (uri) => {
+    const tenant = getTenantContext();
+    const memories = await db
+      .select({
+        id: businessMemory.id,
+        category: businessMemory.category,
+        entityKey: businessMemory.entityKey,
+        memoryValue: businessMemory.memoryValue,
+        confidence: businessMemory.confidence,
+        source: businessMemory.source,
+        isActive: businessMemory.isActive,
+        updatedAt: businessMemory.updatedAt,
+      })
+      .from(businessMemory)
+      .where(
+        and(eq(businessMemory.businessId, tenant.businessId), eq(businessMemory.isActive, true)),
+      );
 
-      return {
-        contents: [
-          {
-            uri: uri.toString(),
-            mimeType: 'application/json',
-            text: JSON.stringify(memories, null, 2),
-          },
-        ],
-      };
-    },
-  );
+    return {
+      contents: [
+        {
+          uri: uri.toString(),
+          mimeType: 'application/json',
+          text: JSON.stringify(memories, null, 2),
+        },
+      ],
+    };
+  });
 
   // ==========================================
   // MCP APPS EXTENSION (ui:// resources & templates)
@@ -252,7 +237,8 @@ export function registerResources(server: McpServer, db: KanakkuDatabase) {
     'ui-gst-liability-card',
     new ResourceTemplate('ui://cards/gst-liability', { list: undefined }),
     {
-      description: 'Interactive HTML card displaying current GST liability, ITC set-off, and statutory deadline',
+      description:
+        'Interactive HTML card displaying current GST liability, ITC set-off, and statutory deadline',
       mimeType: MCP_APP_MIME_TYPE,
     },
     async (uri) => {
@@ -302,7 +288,8 @@ export function registerResources(server: McpServer, db: KanakkuDatabase) {
     'ui-business-briefing-card',
     new ResourceTemplate('ui://cards/business-briefing', { list: undefined }),
     {
-      description: 'Executive financial briefing card with active receivables, cashflows, and recent audit status',
+      description:
+        'Executive financial briefing card with active receivables, cashflows, and recent audit status',
       mimeType: MCP_APP_MIME_TYPE,
     },
     async (uri) => {
@@ -340,12 +327,7 @@ export function registerResources(server: McpServer, db: KanakkuDatabase) {
       const recentPayments = await db
         .select({ amountPaise: payments.amountPaise })
         .from(payments)
-        .where(
-          and(
-            eq(payments.businessId, businessId),
-            gte(payments.paymentDate, thirtyDaysAgo),
-          ),
-        );
+        .where(and(eq(payments.businessId, businessId), gte(payments.paymentDate, thirtyDaysAgo)));
       let cashInflowsPaise = 0n;
       for (const p of recentPayments) {
         cashInflowsPaise += p.amountPaise;
@@ -354,12 +336,7 @@ export function registerResources(server: McpServer, db: KanakkuDatabase) {
       const recentExpenses = await db
         .select({ amountPaise: expenses.amountPaise })
         .from(expenses)
-        .where(
-          and(
-            eq(expenses.businessId, businessId),
-            gte(expenses.expenseDate, thirtyDaysAgo),
-          ),
-        );
+        .where(and(eq(expenses.businessId, businessId), gte(expenses.expenseDate, thirtyDaysAgo)));
       let cashOutflowsPaise = 0n;
       for (const e of recentExpenses) {
         cashOutflowsPaise += e.amountPaise;
@@ -393,10 +370,14 @@ export function registerResources(server: McpServer, db: KanakkuDatabase) {
     },
   );
 
-  function renderInvoicePendingCard(pending: typeof pendingConfirmations.$inferSelect, tokenSecret?: string) {
+  function renderInvoicePendingCard(
+    pending: typeof pendingConfirmations.$inferSelect,
+    tokenSecret?: string,
+  ) {
     const tenant = getTenantContext();
     const payload = pending.payload as Record<string, unknown>;
-    const rawItems = ((payload['line_items'] ?? payload['items']) as Array<Record<string, unknown>>) ?? [];
+    const rawItems =
+      ((payload['line_items'] ?? payload['items']) as Array<Record<string, unknown>>) ?? [];
     const items = rawItems.map((item) => ({
       description: String(item['description'] ?? 'Item'),
       hsnSac: String(item['hsn_sac_code'] ?? item['hsn_sac'] ?? ''),
@@ -436,7 +417,10 @@ export function registerResources(server: McpServer, db: KanakkuDatabase) {
     });
   }
 
-  function renderExpensePendingCard(pending: typeof pendingConfirmations.$inferSelect, tokenSecret?: string) {
+  function renderExpensePendingCard(
+    pending: typeof pendingConfirmations.$inferSelect,
+    tokenSecret?: string,
+  ) {
     const payload = pending.payload as Record<string, unknown>;
     const amountPaise = BigInt(String(payload['amount_paise'] ?? 0));
     const cgstPaise = payload['cgst_paise'] ? BigInt(String(payload['cgst_paise'])) : undefined;

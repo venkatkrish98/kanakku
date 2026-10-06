@@ -402,16 +402,20 @@ To prevent concurrency branching where two simultaneous writes reference the sam
 ## 10. MCP Apps Extension & Interactive UI Cards Architecture
 
 ### 10.1 Protocol & Media Type
+
 Kanakku supports the official Model Context Protocol UI extension (`io.modelcontextprotocol/ui`):
+
 - **Resource MIME Type**: `text/html;profile=mcp-app`
 - **Resource URIs**: `ui://cards/invoice-draft`, `ui://cards/expense-draft`, `ui://cards/payment-reminder-draft`, `ui://cards/month-end-summary/{month}/{year}`.
 - **Tool UI Metadata**: Draft tools attach the `_meta: { "ui/resourceUri": "ui://cards/..." }` attribute conforming to the MCP Apps specification.
 
 ### 10.2 Card Client & Host Bridge Interoperability
+
 - **Card-Side Implementation**: Cards ship a self-contained, zero-dependency client (`window.mcpApp`) adhering to the MCP Apps JSON-RPC postMessage lifecycle (`ui/initialize`, `ui/notifications/initialized`, `ui/notifications/tool-result`, and `tools/call`).
 - **Host Bridge Compatibility**: The server provides a bidirectional bridge [`McpAppsHostBridge`](../packages/mcp-server/src/apps/index.ts) and routes incoming app actions through `/mcp/app-bridge`. Cards are verified against the official `@modelcontextprotocol/ext-apps/app-bridge` [`AppBridge`](../packages/mcp-server/src/apps/index.ts#L13-L25).
 
 ### 10.3 Harness Security Architecture
+
 1. **Header-Only Authentication**: The testing host harness (`/apps/harness`) and bridge endpoint strictly require credentials in headers (`Authorization: Bearer <token>`, `mcp-session-id`, `x-confirmation-token`). No tokens or sessions are ever accepted via URL query parameters.
 2. **Safe HTML Script Context**: Configuration data injected into `<script type="application/json" id="mcp-harness-config">` is sanitized with [`safeJsonForHtml`](../packages/mcp-server/src/apps/index.ts#L32-L39), escaping `<` as `\u003c` to eliminate script breakout/DOM-injection risks.
 3. **Strict Iframe Sandbox**: Harness iframes enforce `sandbox="allow-scripts allow-forms"`, omitting `allow-same-origin` to isolate the host origin.

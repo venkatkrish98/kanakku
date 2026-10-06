@@ -61,9 +61,7 @@ export async function acquirePeriodLock(
   month: number,
 ): Promise<void> {
   const lockKey = year * 100 + month; // e.g. 202607 fits cleanly in signed 32-bit integer
-  await dbOrTx.execute(
-    sql`SELECT pg_advisory_xact_lock(hashtext(${businessId}), ${lockKey})`,
-  );
+  await dbOrTx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${businessId}), ${lockKey})`);
 }
 
 /**
@@ -120,7 +118,9 @@ export async function handleConfirmAction(
 
     const pending = foundRecords[0];
     if (!pending) {
-      throw new Error('INVALID_CONFIRMATION_TOKEN: No pending action matches this confirmation token');
+      throw new Error(
+        'INVALID_CONFIRMATION_TOKEN: No pending action matches this confirmation token',
+      );
     }
 
     // 2. Atomic Idempotency Claim Pattern
@@ -208,7 +208,9 @@ export async function handleConfirmAction(
 
     if (pending.actionType === 'record_expense') {
       const expenseAmountPaise = BigInt(String(payload['amount_paise']));
-      const taxableAmountPaise = BigInt(String(payload['taxable_amount_paise'] ?? payload['amount_paise']));
+      const taxableAmountPaise = BigInt(
+        String(payload['taxable_amount_paise'] ?? payload['amount_paise']),
+      );
       const cgstPaise = BigInt(String(payload['cgst_paise'] ?? 0));
       const sgstPaise = BigInt(String(payload['sgst_paise'] ?? 0));
       const igstPaise = BigInt(String(payload['igst_paise'] ?? 0));
@@ -257,7 +259,8 @@ export async function handleConfirmAction(
           roundOffPaise: 0n,
           gstRateBps: (payload['gst_rate_bps'] as number) ?? 0,
           isItcClaimed,
-          paymentMethod: payload['payment_method'] as 'cash' | 'bank_transfer' | 'upi' | 'card' | 'other',
+          paymentMethod: payload['payment_method'] as
+            'cash' | 'bank_transfer' | 'upi' | 'card' | 'other',
           expenseDate,
           vendorName: (payload['vendor_name'] as string) ?? null,
           vendorGstin: (payload['vendor_gstin'] as string) ?? null,
@@ -1012,7 +1015,6 @@ export async function handleConfirmAction(
       payload: pending.payload,
     });
 
-
     // 5.1 Create Transactional Outbox Item for External Audit Anchoring (ADR-005)
     // Written inside the same ACID database transaction as the month close.
     // If this transaction fails or rolls back, the outbox record also rolls back (zero phantom anchors).
@@ -1043,7 +1045,10 @@ export async function handleConfirmAction(
       audit_id: auditResult.id,
       sequence_number: auditResult.sequenceNumber.toString(),
       entry_hash: auditResult.entryHash,
-      audit_anchor: pending.actionType === 'close_month' ? { anchored: false, status: 'pending', outbox_id: outboxId } : null,
+      audit_anchor:
+        pending.actionType === 'close_month'
+          ? { anchored: false, status: 'pending', outbox_id: outboxId }
+          : null,
       human_summary: executionSummary,
       executed_at: new Date().toISOString(),
     };

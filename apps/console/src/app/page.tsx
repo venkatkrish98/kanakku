@@ -102,11 +102,19 @@ export default function HomePage() {
           }}
         >
           <Sparkles size={20} color="#f59e0b" style={{ marginBottom: '0.5rem' }} />
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#f1f5f9', marginBottom: '0.25rem' }}>
+          <h3
+            style={{
+              fontSize: '0.95rem',
+              fontWeight: 600,
+              color: '#f1f5f9',
+              marginBottom: '0.25rem',
+            }}
+          >
             Push-to-Talk (PTT)
           </h3>
           <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-            Web Speech API + Web Audio API waveform visualization with Indian English speech recognition.
+            Web Speech API + Web Audio API waveform visualization with Indian English speech
+            recognition.
           </p>
         </div>
 
@@ -119,11 +127,19 @@ export default function HomePage() {
           }}
         >
           <ShieldCheck size={20} color="#10b981" style={{ marginBottom: '0.5rem' }} />
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#f1f5f9', marginBottom: '0.25rem' }}>
+          <h3
+            style={{
+              fontSize: '0.95rem',
+              fontWeight: 600,
+              color: '#f1f5f9',
+              marginBottom: '0.25rem',
+            }}
+          >
             Two-Phase Financial Writes
           </h3>
           <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-            Voice commands draft transactions and yield cryptographically secured confirmation tokens.
+            Voice commands draft transactions and yield cryptographically secured confirmation
+            tokens.
           </p>
         </div>
 
@@ -136,7 +152,14 @@ export default function HomePage() {
           }}
         >
           <BookOpen size={20} color="#38bdf8" style={{ marginBottom: '0.5rem' }} />
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#f1f5f9', marginBottom: '0.25rem' }}>
+          <h3
+            style={{
+              fontSize: '0.95rem',
+              fontWeight: 600,
+              color: '#f1f5f9',
+              marginBottom: '0.25rem',
+            }}
+          >
             13 Strict MCP Tools
           </h3>
           <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>

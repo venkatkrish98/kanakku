@@ -44,7 +44,14 @@ export function ToolExecutionChip({ name, args, resultSummary }: ToolExecutionCh
       >
         <Wrench size={13} color="#38bdf8" />
         <span style={{ fontWeight: 600, color: '#38bdf8' }}>MCP Tool:</span>
-        <code style={{ color: '#f1f5f9', background: 'rgba(0,0,0,0.3)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>
+        <code
+          style={{
+            color: '#f1f5f9',
+            background: 'rgba(0,0,0,0.3)',
+            padding: '0.1rem 0.3rem',
+            borderRadius: '4px',
+          }}
+        >
           {name}
         </code>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
@@ -65,7 +72,14 @@ export function ToolExecutionChip({ name, args, resultSummary }: ToolExecutionCh
         >
           <div style={{ marginBottom: '0.25rem' }}>
             <strong style={{ color: '#cbd5e1' }}>Arguments:</strong>
-            <pre style={{ margin: '0.2rem 0', color: '#e2e8f0', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+            <pre
+              style={{
+                margin: '0.2rem 0',
+                color: '#e2e8f0',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-all',
+              }}
+            >
               {JSON.stringify(args, null, 2)}
             </pre>
           </div>

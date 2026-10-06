@@ -14,7 +14,13 @@ export interface BootstrapRoleOptions {
 /**
  * Parses a PostgreSQL connection string to extract password, username, host, etc.
  */
-function parsePostgresUrl(urlString: string): { user: string; pass: string; host: string; port: number; db: string } {
+function parsePostgresUrl(urlString: string): {
+  user: string;
+  pass: string;
+  host: string;
+  port: number;
+  db: string;
+} {
   const url = new URL(urlString);
   return {
     user: decodeURIComponent(url.username),
@@ -42,9 +48,13 @@ export async function bootstrapAppRole(options?: BootstrapRoleOptions): Promise<
     try {
       const sm = new SecretsManagerClient({ region });
       if (!adminDbUrl) {
-        console.log(`[BOOTSTRAP] Fetching admin credentials from AWS Secrets Manager (kanakku/${environment}/database-admin-credentials)...`);
+        console.log(
+          `[BOOTSTRAP] Fetching admin credentials from AWS Secrets Manager (kanakku/${environment}/database-admin-credentials)...`,
+        );
         const adminSecret = await sm.send(
-          new GetSecretValueCommand({ SecretId: `kanakku/${environment}/database-admin-credentials` }),
+          new GetSecretValueCommand({
+            SecretId: `kanakku/${environment}/database-admin-credentials`,
+          }),
         );
         if (adminSecret.SecretString) {
           const parsed = JSON.parse(adminSecret.SecretString);
@@ -53,7 +63,9 @@ export async function bootstrapAppRole(options?: BootstrapRoleOptions): Promise<
       }
 
       if (!appPassword && !appDbUrl) {
-        console.log(`[BOOTSTRAP] Fetching runtime connection URL from AWS Secrets Manager (kanakku/${environment}/database-url)...`);
+        console.log(
+          `[BOOTSTRAP] Fetching runtime connection URL from AWS Secrets Manager (kanakku/${environment}/database-url)...`,
+        );
         const appSecret = await sm.send(
           new GetSecretValueCommand({ SecretId: `kanakku/${environment}/database-url` }),
         );
@@ -94,32 +106,50 @@ export async function bootstrapAppRole(options?: BootstrapRoleOptions): Promise<
   const client = await adminPool.connect();
 
   try {
-    console.log('[BOOTSTRAP] Ensuring PostgreSQL role "kanakku_app" exists with matching password...');
+    console.log(
+      '[BOOTSTRAP] Ensuring PostgreSQL role "kanakku_app" exists with matching password...',
+    );
     // Create or update role password safely with parameterized query
-    const roleCheck = await client.query('SELECT 1 FROM pg_roles WHERE rolname = $1', ['kanakku_app']);
+    const roleCheck = await client.query('SELECT 1 FROM pg_roles WHERE rolname = $1', [
+      'kanakku_app',
+    ]);
     if (roleCheck.rowCount === 0) {
       // Use format string with escaped literal for CREATE USER
-      await client.query(`CREATE USER kanakku_app WITH PASSWORD '${appPassword.replace(/'/g, "''")}';`);
+      await client.query(
+        `CREATE USER kanakku_app WITH PASSWORD '${appPassword.replace(/'/g, "''")}';`,
+      );
       console.log('  Created new user "kanakku_app".');
     } else {
-      await client.query(`ALTER USER kanakku_app WITH PASSWORD '${appPassword.replace(/'/g, "''")}';`);
+      await client.query(
+        `ALTER USER kanakku_app WITH PASSWORD '${appPassword.replace(/'/g, "''")}';`,
+      );
       console.log('  Updated password for existing user "kanakku_app".');
     }
 
     const dbName = parsePostgresUrl(adminDbUrl).db;
-    console.log(`[BOOTSTRAP] Configuring least-privilege permissions on database "${dbName}" (DML only)...`);
+    console.log(
+      `[BOOTSTRAP] Configuring least-privilege permissions on database "${dbName}" (DML only)...`,
+    );
     await client.query(`GRANT CONNECT ON DATABASE "${dbName}" TO kanakku_app;`);
     await client.query('GRANT USAGE ON SCHEMA public TO kanakku_app;');
 
     // DML permissions only
-    await client.query('GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO kanakku_app;');
+    await client.query(
+      'GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO kanakku_app;',
+    );
     await client.query('GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO kanakku_app;');
 
     // Default privileges for subsequent migrations
-    await client.query('ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO kanakku_app;');
-    await client.query('ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO kanakku_app;');
+    await client.query(
+      'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO kanakku_app;',
+    );
+    await client.query(
+      'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO kanakku_app;',
+    );
 
-    console.log('[SUCCESS] Role "kanakku_app" provisioned with verified least-privilege permissions.');
+    console.log(
+      '[SUCCESS] Role "kanakku_app" provisioned with verified least-privilege permissions.',
+    );
   } finally {
     client.release();
     await adminPool.end();
@@ -127,7 +157,10 @@ export async function bootstrapAppRole(options?: BootstrapRoleOptions): Promise<
 }
 
 // Execute when invoked directly
-if (process.argv[1]?.endsWith('bootstrap-app-role.ts') || process.argv[1]?.endsWith('bootstrap-app-role.js')) {
+if (
+  process.argv[1]?.endsWith('bootstrap-app-role.ts') ||
+  process.argv[1]?.endsWith('bootstrap-app-role.js')
+) {
   bootstrapAppRole()
     .then(() => process.exit(0))
     .catch((err) => {

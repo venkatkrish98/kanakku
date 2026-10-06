@@ -65,7 +65,9 @@ export async function handleExplainTransaction(
       .limit(1);
 
     if (!found[0]) {
-      throw new Error(`INVOICE_NOT_FOUND: Invoice with ID "${transaction_id}" not found in your business`);
+      throw new Error(
+        `INVOICE_NOT_FOUND: Invoice with ID "${transaction_id}" not found in your business`,
+      );
     }
     const inv = found[0];
     partyName = inv.customerName;
@@ -107,7 +109,9 @@ export async function handleExplainTransaction(
       .limit(1);
 
     if (!found[0]) {
-      throw new Error(`EXPENSE_NOT_FOUND: Expense with ID "${transaction_id}" not found in your business`);
+      throw new Error(
+        `EXPENSE_NOT_FOUND: Expense with ID "${transaction_id}" not found in your business`,
+      );
     }
     const exp = found[0];
     partyName = exp.vendorName ?? exp.description;
@@ -161,7 +165,9 @@ export async function handleExplainTransaction(
       .limit(1);
 
     if (!found[0]) {
-      throw new Error(`PAYMENT_NOT_FOUND: Payment with ID "${transaction_id}" not found in your business`);
+      throw new Error(
+        `PAYMENT_NOT_FOUND: Payment with ID "${transaction_id}" not found in your business`,
+      );
     }
     const pay = found[0];
     partyName = pay.customerName;
@@ -176,7 +182,8 @@ export async function handleExplainTransaction(
     };
 
     accountingExplanation = `Customer payment received from ${pay.customerName} via ${pay.paymentMode}. Debited Bank Account (Asset) for ${formatInr(pay.amountPaise)} and credited Accounts Receivable (Asset) for ${formatInr(pay.amountPaise)}.`;
-    gstTreatment = 'No GST impact on collection; tax was already recognized at the time of invoice issuance.';
+    gstTreatment =
+      'No GST impact on collection; tax was already recognized at the time of invoice issuance.';
     bookImpact = `Increases realized liquid bank balance and settles customer outstanding receivables.`;
 
     const entry = await db
@@ -270,9 +277,7 @@ export async function handleExplainTransaction(
       createdAt: auditLogs.createdAt,
     })
     .from(auditLogs)
-    .where(
-      and(eq(auditLogs.businessId, businessId), eq(auditLogs.entityId, transaction_id)),
-    )
+    .where(and(eq(auditLogs.businessId, businessId), eq(auditLogs.entityId, transaction_id)))
     .limit(5);
 
   const hasJournal = Boolean(journalEntryRecord);

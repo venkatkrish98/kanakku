@@ -1,6 +1,14 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { eq, sql } from 'drizzle-orm';
-import { getDatabase, closeDatabase, type KanakkuDatabase, businesses, auditLogs, auditAnchorOutbox, idempotencyRecords } from '@kanakku/db';
+import {
+  getDatabase,
+  closeDatabase,
+  type KanakkuDatabase,
+  businesses,
+  auditLogs,
+  auditAnchorOutbox,
+  idempotencyRecords,
+} from '@kanakku/db';
 import {
   appendAuditLog,
   verifyAuditChain,
@@ -291,9 +299,9 @@ describe('Serialized Hash-Chained Audit Engine', () => {
     delete process.env['AUDIT_ANCHOR_SECRET'];
 
     try {
-      await expect(
-        anchorAuditHead(testBizId, db, { anchor: async () => {} }),
-      ).rejects.toThrow(/AUDIT_ANCHOR_SECRET_REQUIRED/);
+      await expect(anchorAuditHead(testBizId, db, { anchor: async () => {} })).rejects.toThrow(
+        /AUDIT_ANCHOR_SECRET_REQUIRED/,
+      );
     } finally {
       if (origSecret) {
         process.env['AUDIT_ANCHOR_SECRET'] = origSecret;
@@ -306,9 +314,7 @@ describe('Serialized Hash-Chained Audit Engine', () => {
     delete process.env['AUDIT_ANCHOR_SECRET'];
 
     try {
-      await expect(anchorAuditHead(testBizId, db)).rejects.toThrow(
-        /AUDIT_ANCHOR_SECRET_REQUIRED/,
-      );
+      await expect(anchorAuditHead(testBizId, db)).rejects.toThrow(/AUDIT_ANCHOR_SECRET_REQUIRED/);
     } finally {
       if (origSecret) {
         process.env['AUDIT_ANCHOR_SECRET'] = origSecret;
@@ -376,7 +382,12 @@ describe('Serialized Hash-Chained Audit Engine', () => {
     });
 
     const sink = new MemoryAnchorSink();
-    const result = await processAuditAnchorOutboxItem(outbox.id, db, sink, 'test-secret-key-32-chars-length!!');
+    const result = await processAuditAnchorOutboxItem(
+      outbox.id,
+      db,
+      sink,
+      'test-secret-key-32-chars-length!!',
+    );
     expect(result.status).toBe('anchored');
     expect(result.receipt).toBeDefined();
     expect(sink.receipts.length).toBe(1);
@@ -394,13 +405,17 @@ describe('Serialized Hash-Chained Audit Engine', () => {
       .select()
       .from(idempotencyRecords)
       .where(eq(idempotencyRecords.idempotencyKey, idempotencyKey));
-    const payload = updatedIdem!.responsePayload as { audit_anchor: { anchored: boolean; status: string } };
+    const payload = updatedIdem!.responsePayload as {
+      audit_anchor: { anchored: boolean; status: string };
+    };
     expect(payload.audit_anchor.anchored).toBe(true);
     expect(payload.audit_anchor.status).toBe('anchored');
 
     // Clean up
     await db.delete(auditAnchorOutbox).where(eq(auditAnchorOutbox.id, outbox.id));
-    await db.delete(idempotencyRecords).where(eq(idempotencyRecords.idempotencyKey, idempotencyKey));
+    await db
+      .delete(idempotencyRecords)
+      .where(eq(idempotencyRecords.idempotencyKey, idempotencyKey));
   });
 
   it('Phase 7 outbox worker: processPendingAuditOutbox retries failed outbox items and recovers', async () => {

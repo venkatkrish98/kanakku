@@ -119,10 +119,15 @@ export class VoiceOrchestrator {
         try {
           const result = await client.confirmAction(req.pendingToken);
           const meta = result._meta as Record<string, unknown> | undefined;
-          const summary = result.content?.[0]?.text || 'Action successfully confirmed and recorded to the ledger.';
+          const summary =
+            result.content?.[0]?.text ||
+            'Action successfully confirmed and recorded to the ledger.';
           return {
-            spokenResponse: 'Done! Your transaction is confirmed and posted to the double-entry books.',
-            toolCalls: [{ name: 'confirm_action', args: { confirmation_token: req.pendingToken }, result }],
+            spokenResponse:
+              'Done! Your transaction is confirmed and posted to the double-entry books.',
+            toolCalls: [
+              { name: 'confirm_action', args: { confirmation_token: req.pendingToken }, result },
+            ],
             actionRequired: 'none',
             draftSummary: { status: 'executed', message: summary, meta },
           };
@@ -141,8 +146,11 @@ export class VoiceOrchestrator {
         try {
           const result = await client.cancelAction(req.pendingToken, 'Cancelled via voice');
           return {
-            spokenResponse: 'Cancelled. The draft has been discarded and no changes were made to your books.',
-            toolCalls: [{ name: 'cancel_action', args: { confirmation_token: req.pendingToken }, result }],
+            spokenResponse:
+              'Cancelled. The draft has been discarded and no changes were made to your books.',
+            toolCalls: [
+              { name: 'cancel_action', args: { confirmation_token: req.pendingToken }, result },
+            ],
             actionRequired: 'none',
           };
         } catch (err: unknown) {
@@ -182,7 +190,10 @@ export class VoiceOrchestrator {
           return bedrockResult;
         }
       } catch (err) {
-        console.warn('Bedrock Converse error or unconfigured credentials, falling back to deterministic intent engine:', err);
+        console.warn(
+          'Bedrock Converse error or unconfigured credentials, falling back to deterministic intent engine:',
+          err,
+        );
       }
     }
 
@@ -248,7 +259,11 @@ export class VoiceOrchestrator {
       assertAuthorizedForLedgerWrite(_req?.userRole);
 
       const { month, year } = this.extractMonthYear(transcript, conversationHistory);
-      const toolCalls: Array<{ name: string; args: Record<string, unknown>; result: McpToolCallResult }> = [];
+      const toolCalls: Array<{
+        name: string;
+        args: Record<string, unknown>;
+        result: McpToolCallResult;
+      }> = [];
 
       // Step 2: Categorise with allow_general_expense
       const catArgs = { month, year, step: 'categorise', payload: { allow_general_expense: true } };
@@ -276,7 +291,12 @@ export class VoiceOrchestrator {
       }
 
       // Step 4: Prepare close
-      const prepArgs = { month, year, step: 'prepare_close', payload: { allow_general_expense: true } };
+      const prepArgs = {
+        month,
+        year,
+        step: 'prepare_close',
+        payload: { allow_general_expense: true },
+      };
       const prepResult = await client.callTool('close_month', prepArgs);
       toolCalls.push({ name: 'close_month', args: prepArgs, result: prepResult });
 
@@ -316,8 +336,15 @@ export class VoiceOrchestrator {
 
     // 0. Explain Transaction Intent (checked prior to record_expense to avoid substring collisions)
     // e.g. "Explain transaction e0000000-0000-...", "Explain expense f0000000-...", "Why did this affect my books?"
-    if (text.includes('explain') || text.includes('accounting treatment') || text.includes('double entry') || text.includes('why did this')) {
-      const uuidMatch = transcript.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+    if (
+      text.includes('explain') ||
+      text.includes('accounting treatment') ||
+      text.includes('double entry') ||
+      text.includes('why did this')
+    ) {
+      const uuidMatch = transcript.match(
+        /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i,
+      );
       let entityType: 'invoice' | 'expense' | 'payment' | 'journal_entry' = 'invoice';
       if (text.includes('expense')) entityType = 'expense';
       else if (text.includes('payment')) entityType = 'payment';
@@ -344,7 +371,8 @@ export class VoiceOrchestrator {
         };
       } else {
         return {
-          spokenResponse: 'Which transaction would you like me to explain? Please specify the transaction or invoice ID.',
+          spokenResponse:
+            'Which transaction would you like me to explain? Please specify the transaction or invoice ID.',
           toolCalls: [],
           actionRequired: 'clarify',
         };
@@ -353,13 +381,19 @@ export class VoiceOrchestrator {
 
     // 1. Record Expense Intent
     // e.g. "Record 2,400 expense for Swiggy client dinner", "Paid 500 cash for petrol"
-    if (text.includes('expense') || text.includes('spent') || text.includes('paid') || text.includes('bought')) {
+    if (
+      text.includes('expense') ||
+      text.includes('spent') ||
+      text.includes('paid') ||
+      text.includes('bought')
+    ) {
       const parsedAmount = this.extractAmount(transcript);
 
       // Validate parsed amount: Fail and clarify if missing or zero
       if (!parsedAmount || parsedAmount <= 0) {
         return {
-          spokenResponse: 'How much was the expense? Please specify the amount so I can prepare the draft.',
+          spokenResponse:
+            'How much was the expense? Please specify the amount so I can prepare the draft.',
           toolCalls: [],
           actionRequired: 'clarify',
         };
@@ -367,7 +401,8 @@ export class VoiceOrchestrator {
 
       if (parsedAmount > 10000000) {
         return {
-          spokenResponse: 'The amount exceeds the single transaction limit of ₹1,00,00,000. Please verify the amount.',
+          spokenResponse:
+            'The amount exceeds the single transaction limit of ₹1,00,00,000. Please verify the amount.',
           toolCalls: [],
           actionRequired: 'clarify',
         };
@@ -383,12 +418,14 @@ export class VoiceOrchestrator {
 
       let paymentMethod: 'upi' | 'cash' | 'bank_transfer' | 'card' = 'upi';
       if (text.includes('cash')) paymentMethod = 'cash';
-      else if (text.includes('bank') || text.includes('neft') || text.includes('rtgs')) paymentMethod = 'bank_transfer';
+      else if (text.includes('bank') || text.includes('neft') || text.includes('rtgs'))
+        paymentMethod = 'bank_transfer';
       else if (text.includes('card')) paymentMethod = 'card';
       else {
         // Resolve preferred payment method from durable business memory
         const vendorKey = `vendor:${description.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
-        const mem = businessMemories[vendorKey] as { default_payment_method?: 'upi' | 'cash' | 'bank_transfer' | 'card' } | undefined;
+        const mem = businessMemories[vendorKey] as
+          { default_payment_method?: 'upi' | 'cash' | 'bank_transfer' | 'card' } | undefined;
         if (mem?.default_payment_method) {
           paymentMethod = mem.default_payment_method;
         }
@@ -439,7 +476,9 @@ export class VoiceOrchestrator {
     // e.g. "Create invoice for TechCorp for 50,000 rupees with 18% GST"
     if (text.includes('invoice') || text.includes('bill')) {
       let customerName = 'TechCorp Solutions';
-      const matchCust = transcript.match(/(?:for|to)\s+([A-Za-z0-9\s&]+?)(?:\s+for|\s+with|\s+amount|\s+due|$)/i);
+      const matchCust = transcript.match(
+        /(?:for|to)\s+([A-Za-z0-9\s&]+?)(?:\s+for|\s+with|\s+amount|\s+due|$)/i,
+      );
       if (matchCust && matchCust[1]) {
         customerName = matchCust[1].trim();
       }
@@ -528,7 +567,12 @@ export class VoiceOrchestrator {
 
       // Check durable business memory for customer preference
       const custKey = `customer:${customerName.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
-      const mem = businessMemories[custKey] as { preferred_tone?: 'polite' | 'firm' | 'urgent'; preferred_channel?: 'whatsapp' | 'email' } | undefined;
+      const mem = businessMemories[custKey] as
+        | {
+            preferred_tone?: 'polite' | 'firm' | 'urgent';
+            preferred_channel?: 'whatsapp' | 'email';
+          }
+        | undefined;
 
       let tone: 'polite' | 'firm' | 'urgent' = mem?.preferred_tone || 'polite';
       if (text.includes('firm')) tone = 'firm';
@@ -546,7 +590,8 @@ export class VoiceOrchestrator {
 
       const result = await client.callTool('send_payment_reminder', args);
       const token = (result._meta?.confirmation_token as string) || undefined;
-      const resourceUri = (result._meta?.['ui/resourceUri'] as string) || 'ui://cards/payment-reminder-draft';
+      const resourceUri =
+        (result._meta?.['ui/resourceUri'] as string) || 'ui://cards/payment-reminder-draft';
 
       return {
         spokenResponse: `Prepared a ${tone} ${channel} payment reminder for ${customerName}. Say confirm to dispatch it.`,
@@ -567,11 +612,18 @@ export class VoiceOrchestrator {
 
     // 4. Outstanding Invoices / Receivables Intent
     // e.g. "Who owes me money?", "Show outstanding invoices"
-    if (text.includes('owe') || text.includes('outstanding') || text.includes('receivable') || text.includes('unpaid')) {
+    if (
+      text.includes('owe') ||
+      text.includes('outstanding') ||
+      text.includes('receivable') ||
+      text.includes('unpaid')
+    ) {
       const result = await client.callTool('list_outstanding_invoices', {});
       const textOutput = result.content?.[0]?.text || '';
       return {
-        spokenResponse: textOutput.split('\n')[0] || 'Here are your current outstanding receivables and ageing breakdown.',
+        spokenResponse:
+          textOutput.split('\n')[0] ||
+          'Here are your current outstanding receivables and ageing breakdown.',
         toolCalls: [{ name: 'list_outstanding_invoices', args: {}, result }],
         actionRequired: 'none',
       };
@@ -588,7 +640,9 @@ export class VoiceOrchestrator {
       const result = await client.callTool('get_gst_liability', args);
       const textOutput = result.content?.[0]?.text || '';
       return {
-        spokenResponse: textOutput.split('\n')[0] || 'Here is your deterministic GST liability calculated for this month.',
+        spokenResponse:
+          textOutput.split('\n')[0] ||
+          'Here is your deterministic GST liability calculated for this month.',
         toolCalls: [{ name: 'get_gst_liability', args, result }],
         actionRequired: 'none',
       };
@@ -596,7 +650,12 @@ export class VoiceOrchestrator {
 
     // 6. Cashflow Summary Intent
     // e.g. "What is my cashflow?", "Show cash inflow and outflow", "Compare cashflow with last month"
-    if (text.includes('cashflow') || text.includes('cash flow') || text.includes('inflow') || text.includes('outflow')) {
+    if (
+      text.includes('cashflow') ||
+      text.includes('cash flow') ||
+      text.includes('inflow') ||
+      text.includes('outflow')
+    ) {
       const now = new Date();
       const fromDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]!;
       const toDate = now.toISOString().split('T')[0]!;
@@ -618,13 +677,18 @@ export class VoiceOrchestrator {
       }
 
       let spoken = '';
-      if (wantsComparison && (parsed['comparison'] as Record<string, unknown>)?.['comparison_summary']) {
+      if (
+        wantsComparison &&
+        (parsed['comparison'] as Record<string, unknown>)?.['comparison_summary']
+      ) {
         spoken = (parsed['comparison'] as Record<string, unknown>)['comparison_summary'] as string;
       } else if (parsed['inflow_formatted'] && parsed['outflow_formatted']) {
         const netPaise = Number(parsed['net_cashflow_paise'] ?? 0);
         spoken = `Realized cash inflow is ${parsed['inflow_formatted']} against outflows of ${parsed['outflow_formatted']}. Net cash flow is ${netPaise >= 0 ? 'positive' : 'negative'} at ${parsed['net_cashflow_formatted']}.`;
       } else {
-        spoken = result.content?.[0]?.text?.split('\n')[0] || 'Here is your realized cashflow movement for the month.';
+        spoken =
+          result.content?.[0]?.text?.split('\n')[0] ||
+          'Here is your realized cashflow movement for the month.';
       }
 
       return {
@@ -649,7 +713,10 @@ export class VoiceOrchestrator {
       } catch {
         parsed = {};
       }
-      const spoken = (parsed['voice_summary'] as string) || result.content?.[0]?.text?.split('\n')[0] || 'Here is what has changed in your business since your last briefing.';
+      const spoken =
+        (parsed['voice_summary'] as string) ||
+        result.content?.[0]?.text?.split('\n')[0] ||
+        'Here is what has changed in your business since your last briefing.';
       return {
         spokenResponse: spoken,
         toolCalls: [{ name: 'whats_changed_since', args, result }],
@@ -659,7 +726,12 @@ export class VoiceOrchestrator {
 
     // 8. Business Briefing Intent
     // e.g. "Give me a business briefing", "Daily briefing", "Weekly briefing", "How is my business doing?"
-    if (text.includes('briefing') || text.includes('summary') || text.includes('overview') || text.includes('how is my business')) {
+    if (
+      text.includes('briefing') ||
+      text.includes('summary') ||
+      text.includes('overview') ||
+      text.includes('how is my business')
+    ) {
       const timeframe: 'today' | 'weekly' = text.includes('week') ? 'weekly' : 'today';
       const args = { timeframe };
       const result = await client.callTool('get_business_briefing', args);
@@ -669,7 +741,10 @@ export class VoiceOrchestrator {
       } catch {
         parsed = {};
       }
-      const spoken = (parsed['voice_summary'] as string) || result.content?.[0]?.text?.split('\n')[0] || 'Here is your business financial briefing.';
+      const spoken =
+        (parsed['voice_summary'] as string) ||
+        result.content?.[0]?.text?.split('\n')[0] ||
+        'Here is your business financial briefing.';
       return {
         spokenResponse: spoken,
         toolCalls: [{ name: 'get_business_briefing', args, result }],
@@ -677,9 +752,6 @@ export class VoiceOrchestrator {
         actionRequired: 'none',
       };
     }
-
-
-
 
     // 9. Close Month Intent
     // e.g. "Close month for September", "Start month end close", "Resume month close", "Close August 2026 books"
@@ -692,7 +764,11 @@ export class VoiceOrchestrator {
       text.includes('continue month')
     ) {
       const { month, year } = this.extractMonthYear(transcript, conversationHistory);
-      const toolCalls: Array<{ name: string; args: Record<string, unknown>; result: McpToolCallResult }> = [];
+      const toolCalls: Array<{
+        name: string;
+        args: Record<string, unknown>;
+        result: McpToolCallResult;
+      }> = [];
 
       const initialArgs = { month, year, step: 'resume' };
       const result = await client.callTool('close_month', initialArgs);
@@ -715,7 +791,9 @@ export class VoiceOrchestrator {
       }
 
       // Case 2: Scan complete with uncategorized expenses
-      const uncategorized = Number(parsed['uncategorized_expenses_count'] ?? parsed['uncategorized_count'] ?? 0);
+      const uncategorized = Number(
+        parsed['uncategorized_expenses_count'] ?? parsed['uncategorized_count'] ?? 0,
+      );
       if (parsed['step'] === 'scan' && uncategorized > 0) {
         return {
           spokenResponse: `I scanned the ledger for ${month}/${year}. There are ${uncategorized} uncategorized expenses. Would you like to treat them as general operational expenses, or review them before closing?`,
@@ -734,7 +812,11 @@ export class VoiceOrchestrator {
       }
 
       // Case 3: Categorise step with remaining uncategorized items
-      if (parsed['step'] === 'categorise' && uncategorized > 0 && !parsed['allow_general_expense']) {
+      if (
+        parsed['step'] === 'categorise' &&
+        uncategorized > 0 &&
+        !parsed['allow_general_expense']
+      ) {
         return {
           spokenResponse: `There are ${uncategorized} uncategorized expenses remaining for ${month}/${year}. Would you like to approve them as general operational expenses?`,
           toolCalls,
@@ -838,7 +920,9 @@ export class VoiceOrchestrator {
       const result = await client.callTool('get_audit_history', { limit: 5 });
       const textOutput = result.content?.[0]?.text || '';
       return {
-        spokenResponse: textOutput.split('\n')[0] || 'Here are the latest entries from your tamper-evident audit log.',
+        spokenResponse:
+          textOutput.split('\n')[0] ||
+          'Here are the latest entries from your tamper-evident audit log.',
         toolCalls: [{ name: 'get_audit_history', args: { limit: 5 }, result }],
         actionRequired: 'none',
       };
@@ -846,7 +930,8 @@ export class VoiceOrchestrator {
 
     // Default conversational help response
     return {
-      spokenResponse: "I'm ready. You can say 'Record an expense of 2,400 for dinner', 'Who owes me money?', 'What is my GST liability?', or 'Create an invoice for TechCorp for 50,000'.",
+      spokenResponse:
+        "I'm ready. You can say 'Record an expense of 2,400 for dinner', 'Who owes me money?', 'What is my GST liability?', or 'Create an invoice for TechCorp for 50,000'.",
       toolCalls: [],
       actionRequired: 'none',
     };
@@ -880,18 +965,30 @@ export class VoiceOrchestrator {
     history?: Array<{ role: string; content: string }>,
   ): { month: number; year: number } {
     const monthNames: Record<string, number> = {
-      january: 1, jan: 1,
-      february: 2, feb: 2,
-      march: 3, mar: 3,
-      april: 4, apr: 4,
+      january: 1,
+      jan: 1,
+      february: 2,
+      feb: 2,
+      march: 3,
+      mar: 3,
+      april: 4,
+      apr: 4,
       may: 5,
-      june: 6, jun: 6,
-      july: 7, jul: 7,
-      august: 8, aug: 8,
-      september: 9, sep: 9, sept: 9,
-      october: 10, oct: 10,
-      november: 11, nov: 11,
-      december: 12, dec: 12,
+      june: 6,
+      jun: 6,
+      july: 7,
+      jul: 7,
+      august: 8,
+      aug: 8,
+      september: 9,
+      sep: 9,
+      sept: 9,
+      october: 10,
+      oct: 10,
+      november: 11,
+      nov: 11,
+      december: 12,
+      dec: 12,
     };
 
     const lower = text.toLowerCase();
@@ -978,9 +1075,10 @@ export class VoiceOrchestrator {
         },
       }));
 
-    const memoryPrompt = Object.keys(businessMemories).length > 0
-      ? `\nACTIVE TENANT BUSINESS PREFERENCES:\n${JSON.stringify(businessMemories, null, 2)}`
-      : '';
+    const memoryPrompt =
+      Object.keys(businessMemories).length > 0
+        ? `\nACTIVE TENANT BUSINESS PREFERENCES:\n${JSON.stringify(businessMemories, null, 2)}`
+        : '';
 
     const conversation = [
       ...(req.conversationHistory || []).map((m) => ({
@@ -1025,8 +1123,14 @@ export class VoiceOrchestrator {
         const toolArgs = (contentBlock.toolUse.input as Record<string, unknown>) || {};
 
         // Hard Server-Side Approval Gate: Refuse any model-initiated confirm_action or unapproved tool
-        if (!ALLOWED_BEDROCK_TOOLS.has(toolName) || toolName === 'confirm_action' || toolName === 'cancel_action') {
-          console.warn(`SECURITY_VIOLATION_BLOCKED: Bedrock model attempted to call prohibited tool '${toolName}'. Execution rejected.`);
+        if (
+          !ALLOWED_BEDROCK_TOOLS.has(toolName) ||
+          toolName === 'confirm_action' ||
+          toolName === 'cancel_action'
+        ) {
+          console.warn(
+            `SECURITY_VIOLATION_BLOCKED: Bedrock model attempted to call prohibited tool '${toolName}'. Execution rejected.`,
+          );
           continue;
         }
 

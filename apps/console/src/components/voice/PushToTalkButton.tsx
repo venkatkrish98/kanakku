@@ -108,11 +108,23 @@ export function PushToTalkButton({
 
         {/* Dynamic State Icons */}
         {isListening ? (
-          <Mic size={compact ? 22 : 32} color="#ffffff" style={{ animation: 'bounce 1s infinite' }} />
+          <Mic
+            size={compact ? 22 : 32}
+            color="#ffffff"
+            style={{ animation: 'bounce 1s infinite' }}
+          />
         ) : isProcessing ? (
-          <Loader2 size={compact ? 22 : 32} color="#ffffff" style={{ animation: 'spin 1s linear infinite' }} />
+          <Loader2
+            size={compact ? 22 : 32}
+            color="#ffffff"
+            style={{ animation: 'spin 1s linear infinite' }}
+          />
         ) : isSpeaking ? (
-          <Volume2 size={compact ? 22 : 32} color="#ffffff" style={{ animation: 'pulse 1.2s infinite' }} />
+          <Volume2
+            size={compact ? 22 : 32}
+            color="#ffffff"
+            style={{ animation: 'pulse 1.2s infinite' }}
+          />
         ) : isError ? (
           <AlertCircle size={compact ? 22 : 32} color="#ffffff" />
         ) : (
@@ -125,7 +137,13 @@ export function PushToTalkButton({
           <span
             style={{
               fontWeight: 600,
-              color: isListening ? '#34d399' : isSpeaking ? '#a5b4fc' : isProcessing ? '#60a5fa' : '#94a3b8',
+              color: isListening
+                ? '#34d399'
+                : isSpeaking
+                  ? '#a5b4fc'
+                  : isProcessing
+                    ? '#60a5fa'
+                    : '#94a3b8',
             }}
           >
             {isListening

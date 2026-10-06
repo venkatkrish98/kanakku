@@ -14,14 +14,8 @@ import {
 import { getGstLiabilitySchema, handleGetGstLiability } from './gst-liability.js';
 import { cashflowSummarySchema, handleCashflowSummary } from './cashflow-summary.js';
 import { whatsChangedSinceSchema, handleWhatsChangedSince } from './whats-changed.js';
-import {
-  getBusinessBriefingSchema,
-  handleGetBusinessBriefing,
-} from './business-briefing.js';
-import {
-  explainTransactionSchema,
-  handleExplainTransaction,
-} from './explain-transaction.js';
+import { getBusinessBriefingSchema, handleGetBusinessBriefing } from './business-briefing.js';
+import { explainTransactionSchema, handleExplainTransaction } from './explain-transaction.js';
 import { getAuditHistorySchema, handleGetAuditHistory } from './audit-history.js';
 
 export function registerTools(server: McpServer, db: KanakkuDatabase) {

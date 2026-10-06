@@ -32,15 +32,21 @@ export async function handleCancelAction(
 
     const pending = foundRecords[0];
     if (!pending) {
-      throw new Error('INVALID_CONFIRMATION_TOKEN: No pending action matches this confirmation token');
+      throw new Error(
+        'INVALID_CONFIRMATION_TOKEN: No pending action matches this confirmation token',
+      );
     }
 
     if (pending.businessId !== businessId) {
-      throw new Error('TENANT_MISMATCH: Confirmation token does not belong to the authenticated business');
+      throw new Error(
+        'TENANT_MISMATCH: Confirmation token does not belong to the authenticated business',
+      );
     }
 
     if (pending.consumedAt !== null) {
-      throw new Error('CONFIRMATION_ALREADY_CONSUMED: This confirmation has already been executed or cancelled');
+      throw new Error(
+        'CONFIRMATION_ALREADY_CONSUMED: This confirmation has already been executed or cancelled',
+      );
     }
 
     // Mark as consumed / voided

@@ -2,11 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { createHash } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import { getDatabase, closeDatabase, type KanakkuDatabase, users } from '@kanakku/db';
-import {
-  authenticateToken,
-  getTenantContext,
-  tenantContextStorage,
-} from './index.js';
+import { authenticateToken, getTenantContext, tenantContextStorage } from './index.js';
 
 describe('Auth & Tenant Context Provider', () => {
   let db: KanakkuDatabase;
@@ -44,9 +40,7 @@ describe('Auth & Tenant Context Provider', () => {
   });
 
   it('rejects registered user email shortcut with INVALID_CREDENTIALS', async () => {
-    await expect(authenticateToken('ramesh@kanakku.in', db)).rejects.toThrow(
-      'INVALID_CREDENTIALS',
-    );
+    await expect(authenticateToken('ramesh@kanakku.in', db)).rejects.toThrow('INVALID_CREDENTIALS');
   });
 
   it('rejects empty authentication token', async () => {

@@ -344,7 +344,9 @@ export default function VoiceSimulatorPage() {
               gap: '0.4rem',
               fontSize: '0.78rem',
               background: apiKey ? 'rgba(56, 189, 248, 0.1)' : 'rgba(239, 68, 68, 0.15)',
-              border: apiKey ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid rgba(239, 68, 68, 0.4)',
+              border: apiKey
+                ? '1px solid rgba(56, 189, 248, 0.3)'
+                : '1px solid rgba(239, 68, 68, 0.4)',
               color: apiKey ? '#38bdf8' : '#f87171',
               padding: '0.3rem 0.75rem',
               borderRadius: '9999px',
@@ -381,7 +383,10 @@ export default function VoiceSimulatorPage() {
                   role: 'assistant',
                   content:
                     'Vanakkam! Session reset. How can I help with your accounting or GST today?',
-                  timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                  timestamp: new Date().toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  }),
                 },
               ]);
               setPendingDraftToken(null);
@@ -422,7 +427,8 @@ export default function VoiceSimulatorPage() {
         >
           <AlertTriangle size={16} />
           <span>
-            Web Speech Recognition is not supported by your browser. You can still use the text input below.
+            Web Speech Recognition is not supported by your browser. You can still use the text
+            input below.
           </span>
         </div>
       )}
@@ -502,8 +508,7 @@ export default function VoiceSimulatorPage() {
               style={{
                 maxWidth: '85%',
                 padding: '1rem 1.25rem',
-                borderRadius:
-                  msg.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+                borderRadius: msg.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
                 background:
                   msg.role === 'user'
                     ? 'linear-gradient(135deg, #1d4ed8, #2563eb)'
@@ -625,7 +630,8 @@ export default function VoiceSimulatorPage() {
           bottom: 0,
           left: 0,
           right: 0,
-          background: 'linear-gradient(180deg, rgba(9, 13, 22, 0) 0%, rgba(9, 13, 22, 0.95) 40%, #090d16 100%)',
+          background:
+            'linear-gradient(180deg, rgba(9, 13, 22, 0) 0%, rgba(9, 13, 22, 0.95) 40%, #090d16 100%)',
           backdropFilter: 'blur(16px)',
           padding: '0.5rem 1.5rem 0.85rem 1.5rem',
           display: 'flex',
@@ -634,11 +640,24 @@ export default function VoiceSimulatorPage() {
           zIndex: 50,
         }}
       >
-        <div style={{ maxWidth: '820px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div
+          style={{
+            maxWidth: '820px',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
           {/* Active Audio Waveform (Visible only when speaking or listening) */}
           {(state === 'listening' || state === 'speaking') && (
             <div style={{ marginBottom: '0.4rem' }}>
-              <WaveformVisualizer analyserNode={analyserNode} state={state} width={260} height={28} />
+              <WaveformVisualizer
+                analyserNode={analyserNode}
+                state={state}
+                width={260}
+                height={28}
+              />
             </div>
           )}
 
@@ -715,7 +734,10 @@ export default function VoiceSimulatorPage() {
           {/* Quick SMB Prompt Pills (shown only at start so content is never blocked) */}
           {messages.length <= 1 && (
             <div style={{ marginTop: '0.5rem', width: '100%' }}>
-              <QuickPromptList onSelectPrompt={(prompt) => handleUserTurn(prompt)} disabled={state === 'processing'} />
+              <QuickPromptList
+                onSelectPrompt={(prompt) => handleUserTurn(prompt)}
+                disabled={state === 'processing'}
+              />
             </div>
           )}
         </div>
@@ -750,16 +772,25 @@ export default function VoiceSimulatorPage() {
               boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+            <div
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}
+            >
               <Key size={20} color="#38bdf8" />
               <h2 id="auth-modal-title" style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>
                 Kanakku Tenant Authentication
               </h2>
             </div>
 
-            <p style={{ fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.5, marginBottom: '1rem' }}>
-              Enter your business API Key to authenticate your voice console session. Requests will be strictly
-              scoped to your tenant.
+            <p
+              style={{
+                fontSize: '0.85rem',
+                color: '#94a3b8',
+                lineHeight: 1.5,
+                marginBottom: '1rem',
+              }}
+            >
+              Enter your business API Key to authenticate your voice console session. Requests will
+              be strictly scoped to your tenant.
             </p>
 
             {authError && (

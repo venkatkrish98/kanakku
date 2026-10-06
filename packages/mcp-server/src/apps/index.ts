@@ -9,10 +9,7 @@ import {
   RESOURCE_URI_META_KEY,
   PostMessageTransport,
 } from '@modelcontextprotocol/ext-apps';
-import {
-  AppBridge,
-  getToolUiResourceUri,
-} from '@modelcontextprotocol/ext-apps/app-bridge';
+import { AppBridge, getToolUiResourceUri } from '@modelcontextprotocol/ext-apps/app-bridge';
 
 export {
   App,
@@ -560,7 +557,8 @@ export class McpAppsHostBridge {
       try {
         const parsedUrl = new URL(this.serverUrl);
         const hostname = parsedUrl.hostname;
-        const isLoopback = hostname === '127.0.0.1' || hostname === 'localhost' || hostname === '::1';
+        const isLoopback =
+          hostname === '127.0.0.1' || hostname === 'localhost' || hostname === '::1';
         if (!isLoopback) {
           throw new Error(`Untrusted serverUrl target rejected for SSRF protection: ${hostname}`);
         }
@@ -613,7 +611,10 @@ export class McpAppsHostBridge {
           return {
             jsonrpc: '2.0',
             id,
-            error: { code: -32000, message: `Failed to parse server response: ${rawText.slice(0, 200)}` },
+            error: {
+              code: -32000,
+              message: `Failed to parse server response: ${rawText.slice(0, 200)}`,
+            },
           };
         }
 
@@ -633,7 +634,8 @@ export class McpAppsHostBridge {
           }
         } else {
           if (json.result && typeof json.result === 'object') {
-            const textContent = (json.result as { content?: Array<{ text?: string }> })?.content?.[0]?.text;
+            const textContent = (json.result as { content?: Array<{ text?: string }> })
+              ?.content?.[0]?.text;
             let parsed: Record<string, unknown> = {};
             if (textContent) {
               try {
@@ -660,7 +662,10 @@ export class McpAppsHostBridge {
           };
         }
       } catch (fetchErr: unknown) {
-        if (!this.db || (!contextOverride && !this.tenantContext && !tenantContextStorage.getStore())) {
+        if (
+          !this.db ||
+          (!contextOverride && !this.tenantContext && !tenantContextStorage.getStore())
+        ) {
           const msg = fetchErr instanceof Error ? fetchErr.message : String(fetchErr);
           return {
             jsonrpc: '2.0',
@@ -673,8 +678,7 @@ export class McpAppsHostBridge {
     }
 
     // 3. Fallback: Direct Database / Tenant execution
-    const activeContext =
-      contextOverride ?? this.tenantContext ?? tenantContextStorage.getStore();
+    const activeContext = contextOverride ?? this.tenantContext ?? tenantContextStorage.getStore();
 
     if (!activeContext || !this.db) {
       return {
@@ -682,7 +686,8 @@ export class McpAppsHostBridge {
         id,
         error: {
           code: -32000,
-          message: 'UNAUTHENTICATED_TENANT_CONTEXT: Host bridge requires an active tenant context or serverUrl',
+          message:
+            'UNAUTHENTICATED_TENANT_CONTEXT: Host bridge requires an active tenant context or serverUrl',
         },
       };
     }
@@ -725,7 +730,8 @@ export class McpAppsHostBridge {
           };
         }
 
-        const textContent = (toolResult as { content?: Array<{ text?: string }> })?.content?.[0]?.text;
+        const textContent = (toolResult as { content?: Array<{ text?: string }> })?.content?.[0]
+          ?.text;
         let parsed: Record<string, unknown> = {};
         if (textContent) {
           try {
@@ -908,8 +914,14 @@ export class McpAppsBrowserHost {
   public bridgeEndpoint: string;
   private messageListener?: (event: { data: unknown; source?: unknown }) => void;
   private attachedTarget?: {
-    addEventListener: (type: string, listener: (event: { data: unknown; source?: unknown }) => void) => void;
-    removeEventListener: (type: string, listener: (event: { data: unknown; source?: unknown }) => void) => void;
+    addEventListener: (
+      type: string,
+      listener: (event: { data: unknown; source?: unknown }) => void,
+    ) => void;
+    removeEventListener: (
+      type: string,
+      listener: (event: { data: unknown; source?: unknown }) => void,
+    ) => void;
   };
 
   constructor(options: McpAppsBrowserHostOptions) {
@@ -921,8 +933,14 @@ export class McpAppsBrowserHost {
   }
 
   attach(target: {
-    addEventListener: (type: string, listener: (event: { data: unknown; source?: unknown }) => void) => void;
-    removeEventListener: (type: string, listener: (event: { data: unknown; source?: unknown }) => void) => void;
+    addEventListener: (
+      type: string,
+      listener: (event: { data: unknown; source?: unknown }) => void,
+    ) => void;
+    removeEventListener: (
+      type: string,
+      listener: (event: { data: unknown; source?: unknown }) => void,
+    ) => void;
   }): void {
     this.attachedTarget = target;
     this.messageListener = async (event: { data: unknown; source?: unknown }) => {
@@ -1044,7 +1062,10 @@ export class McpAppsBrowserHost {
           return {
             jsonrpc: '2.0',
             id: id as string | number,
-            error: { code: -32000, message: `Failed to parse MCP server response: ${rawText.slice(0, 200)}` },
+            error: {
+              code: -32000,
+              message: `Failed to parse MCP server response: ${rawText.slice(0, 200)}`,
+            },
           };
         }
 
@@ -1071,4 +1092,3 @@ export class McpAppsBrowserHost {
     };
   }
 }
-

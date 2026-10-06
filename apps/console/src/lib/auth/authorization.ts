@@ -181,7 +181,10 @@ export function isConfirmationIntent(transcript: string): boolean {
   }
 
   // 2. Tokenize alphanumeric words
-  const words = trimmed.replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
+  const words = trimmed
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean);
   if (words.length === 0) {
     return false;
   }
@@ -206,20 +209,20 @@ export function isConfirmationIntent(transcript: string): boolean {
 
 /**
  * Asserts whether a voice transcript expresses an unambiguous cancellation intent.
- * 
+ *
  * Strict safety rules:
  * 1. Must NOT contain negation of cancellation (e.g. "don't cancel", "do not discard").
  * 2. Must NOT contain contradictory, conditional, or hesitation terms (e.g. "yet", "wait", "hold", "keep", "if", "unless").
  * 3. Must contain at least one primary cancellation token (e.g. "cancel", "discard", "abort", "reject", "no").
  * 4. Every token must belong to the permitted cancellation vocabulary.
- * 
+ *
  * Rejects:
  * - "No, don't cancel yet" (contains "don't cancel", "yet")
  * - "No, wait a minute" (contains "wait")
  * - "No, keep it" (contains "keep")
  * - "Cancel if total is wrong" (contains "if")
  * - "No, I want to confirm" (contains "confirm")
- * 
+ *
  * Accepts:
  * - "Cancel"
  * - "Cancel it"
@@ -256,7 +259,10 @@ export function isCancellationIntent(transcript: string): boolean {
   }
 
   // 3. Tokenize alphanumeric words
-  const words = trimmed.replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
+  const words = trimmed
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean);
   if (words.length === 0) {
     return false;
   }

@@ -51,12 +51,13 @@ Kanakku is designed and architected for deployment on **Amazon Web Services (AWS
 
 The repository uses pnpm workspaces. Separate multi-stage Dockerfiles isolate build-time compilers from the lean production runtime:
 
-| Container | Base Image | Port | Health Check | Entrypoint |
-|:---|:---|:---:|:---|:---|
-| **`kanakku-mcp-server`** | `node:22-alpine` | `3001` | `GET /health` | `node packages/mcp-server/dist/index.js` |
-| **`kanakku-console`** | `node:22-alpine` | `3000` | `GET /api/health` | `next start --port 3000` |
+| Container                | Base Image       |  Port  | Health Check      | Entrypoint                               |
+| :----------------------- | :--------------- | :----: | :---------------- | :--------------------------------------- |
+| **`kanakku-mcp-server`** | `node:22-alpine` | `3001` | `GET /health`     | `node packages/mcp-server/dist/index.js` |
+| **`kanakku-console`**    | `node:22-alpine` | `3000` | `GET /api/health` | `next start --port 3000`                 |
 
 ### 2.2. Package Distribution & Entrypoint Resolution
+
 - Both `@kanakku/core` and `@kanakku/db` are compiled to `./dist` during the builder stage.
 - The production runner stages explicitly copy `./packages/db/dist` (along with `@kanakku/core/dist`), allowing Node.js to resolve package export maps (`"." -> "./dist/index.js"`).
 - Non-root execution runs under unprivileged system users (`kanakku:1001` and `nextjs:1001`).
@@ -66,17 +67,20 @@ The repository uses pnpm workspaces. Separate multi-stage Dockerfiles isolate bu
 ## 3. AWS App Runner & Networking Architecture
 
 ### 3.1. Image-Based Deployment vs `apprunner.yaml`
+
 - **Important**: AWS App Runner `apprunner.yaml` files are exclusively for source-code deployments from GitHub. For pre-built container images stored in Amazon ECR, App Runner services are provisioned via:
   1. **Terraform**: Resources `aws_apprunner_service.mcp_server` and `aws_apprunner_service.console` in [`infra/terraform/main.tf`](../infra/terraform/main.tf).
   2. **AWS CLI Input JSON**: [`infra/apprunner/mcp-server-service-input.json`](../infra/apprunner/mcp-server-service-input.json) and [`infra/apprunner/console-service-input.json`](../infra/apprunner/console-service-input.json) via `aws apprunner create-service --cli-input-json file://...`.
 
 ### 3.2. VPC Egress & Connectivity
+
 - When App Runner connects to private VPC subnets via `aws_apprunner_vpc_connector.rds_connector`, all egress traffic is directed into the VPC.
 - To prevent connectivity blackholes to public APIs or AWS endpoints:
   - **NAT Gateway & Internet Gateway**: Public subnets host an AWS NAT Gateway so egress traffic can reach external endpoints.
   - **AWS PrivateLink VPC Endpoints**: Interface endpoints for `secretsmanager`, `logs`, and `bedrock-runtime` route AWS API calls directly over the AWS private backbone.
 
 ### 3.3. Service-to-Service Communication
+
 - The Console connects to the MCP Server via its authentic App Runner HTTPS URL: `https://${aws_apprunner_service.mcp_server.service_url}`.
 - Communication is secured via Bearer token authentication and tenant headers (`X-Tenant-Key`).
 
@@ -85,12 +89,14 @@ The repository uses pnpm workspaces. Separate multi-stage Dockerfiles isolate bu
 ## 4. Amazon RDS PostgreSQL 16 & Secrets Manager
 
 ### 4.1. Database Configuration
+
 - **Engine**: PostgreSQL 16.2 on AWS Graviton (`db.t4g.medium`).
 - **High Availability**: Multi-AZ standby replica with automatic failover.
 - **Security Group Ingress**: Port 5432 ingress is locked exclusively to the security group of the App Runner VPC Connector (`aws_security_group.apprunner_connector_sg`).
 - **Storage Encryption**: AES-256 encryption at rest managed by AWS KMS.
 
 ### 4.2. Secrets Manager Integration & Least-Privilege Role Separation
+
 - **Runtime Application User (`kanakku_app`)**:  
   Runtime containers (MCP server and Web Console) connect using a dedicated least-privilege database user `kanakku_app` provisioned via [`infra/db/init-runtime-user.sql`](../infra/db/init-runtime-user.sql). This user possesses strictly DML permissions (`SELECT`, `INSERT`, `UPDATE`, `DELETE`) on application tables and `USAGE` on sequences. It has zero DDL permissions (cannot drop, alter, or truncate tables).
 - **Dedicated Plain URL Secret (`kanakku/${var.environment}/database-url`)**:  
@@ -109,14 +115,13 @@ The repository uses pnpm workspaces. Separate multi-stage Dockerfiles isolate bu
 ## 5. Amazon Bedrock Converse API Integration
 
 ### 5.1. IAM Instance Roles & Least Privilege
+
 The console container assumes an IAM instance role (`KanakkuConsoleInstanceRole`) with permissions limited strictly to conversational model execution:
+
 ```json
 {
   "Effect": "Allow",
-  "Action": [
-    "bedrock:InvokeModel",
-    "bedrock:InvokeModelWithResponseStream"
-  ],
+  "Action": ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
   "Resource": [
     "arn:aws:bedrock:*::foundation-model/anthropic.claude-3-5-sonnet-*",
     "arn:aws:bedrock:*::foundation-model/anthropic.claude-3-5-haiku-*"
@@ -125,7 +130,9 @@ The console container assumes an IAM instance role (`KanakkuConsoleInstanceRole`
 ```
 
 ### 5.2. Deterministic Intent Fallback
+
 In accordance with Kanakku ADR-002:
+
 - If Bedrock Converse credentials are not configured or encounter temporary throttling/network interruptions, the orchestrator gracefully falls back to the internal regex-based deterministic intent engine without dropping user voice sessions.
 
 ---
@@ -133,14 +140,18 @@ In accordance with Kanakku ADR-002:
 ## 6. Audit Trail Anchoring & Compliance Immutability (ADR-005)
 
 ### 6.1. Operational Anchoring vs Regulatory WORM Storage
+
 As specified in [ADR-005](adr/ADR-005-double-entry-ledger-and-audit.md), an internal cryptographic hash chain protects against application-level tampering. To defend against a database administrator or superuser rewriting database rows and regenerating hashes, Kanakku anchors the latest `entry_hash` to external append-only storage:
+
 - **Operational Log Sink (CloudWatch Logs)**:  
   CloudWatch Logs receives append-only structured audit anchor events with a 365-day event expiration policy. Note that CloudWatch retention defines an automated deletion lifecycle after 365 days.
 - **Regulatory WORM Archive (Amazon S3 Object Lock)**:  
   For statutory compliance requiring non-rewritable, non-erasable records (e.g. Indian Companies Act 8-year statutory ledger retention or RBI/SEBI requirements), audit anchor streams can be exported or replicated to an **Amazon S3 bucket configured with Object Lock in Compliance Mode**. S3 Object Lock provides true Write-Once-Read-Many (WORM) immutability, ensuring that even AWS account root users cannot delete or alter records before the retention period expires.
 
 ### 6.2. Post-Commit Cryptographic Anchoring Flow & Transactional Outbox (ADR-005)
+
 To prevent **phantom anchors** (external CloudWatch audit entries created for database transactions that subsequently abort or roll back) while guaranteeing 100% durable asynchronous recovery:
+
 1. **In-Transaction Atomic Outbox Record**:
    - The month close, ledger locks, audit log entry, token consumption, and an `audit_anchor_outbox` record are written and committed in the **same atomic database transaction**.
    - If the transaction fails or rolls back, the outbox record rolls back as well (zero phantom anchors).
@@ -168,6 +179,7 @@ To prevent **phantom anchors** (external CloudWatch audit entries created for da
 App Runner requires container images to exist in Amazon ECR before service creation. Kanakku manages this cleanly through a 3-stage lifecycle:
 
 ### Stage 1: Provision Foundation Infrastructure & ECR Repositories
+
 ```bash
 cd infra/terraform
 terraform init
@@ -185,7 +197,9 @@ terraform apply tfplan
 ```
 
 ### Stage 1.5: Bootstrap Database Schema & Least-Privilege Runtime Role (`kanakku_app`)
+
 Before starting application containers, initialize database tables and provision the `kanakku_app` user with the generated secret:
+
 ```bash
 # Retrieve secrets from AWS Secrets Manager
 ADMIN_DB_URL=$(aws secretsmanager get-secret-value --secret-id kanakku/production/database-admin-credentials --query SecretString --output text | jq -r .DATABASE_URL)
@@ -199,6 +213,7 @@ ADMIN_DATABASE_URL="${ADMIN_DB_URL}" APP_DATABASE_URL="${RUNTIME_DB_URL}" pnpm -
 ```
 
 ### Stage 2: Build & Push Production Containers to ECR
+
 ```bash
 # Set your AWS Account ID and Region
 export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
@@ -217,7 +232,9 @@ docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/kanakku-consol
 ```
 
 ### Stage 3: Provision & Verify App Runner Services
+
 Now that images exist in ECR and the `kanakku_app` database user is provisioned, deploy App Runner services via Terraform:
+
 ```bash
 cd infra/terraform
 terraform apply -var="enable_apprunner_services=true"

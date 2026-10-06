@@ -28,7 +28,11 @@ export class McpHttpClient {
   private messageCounter = 1;
 
   constructor(config: McpClientConfig = {}) {
-    this.baseUrl = (config.baseUrl || process.env.MCP_SERVER_URL || 'http://127.0.0.1:3001').replace(/\/$/, '');
+    this.baseUrl = (
+      config.baseUrl ||
+      process.env.MCP_SERVER_URL ||
+      'http://127.0.0.1:3001'
+    ).replace(/\/$/, '');
     this.token = config.token || process.env.KANAKKU_API_KEY || '';
     if (config.sessionId) {
       this.sessionId = config.sessionId;
@@ -63,7 +67,12 @@ export class McpHttpClient {
       throw new Error(`MCP initialize failed: ${JSON.stringify(res.error)}`);
     }
 
-    return (res.result as { serverInfo: unknown; capabilities: unknown }) || { serverInfo: {}, capabilities: {} };
+    return (
+      (res.result as { serverInfo: unknown; capabilities: unknown }) || {
+        serverInfo: {},
+        capabilities: {},
+      }
+    );
   }
 
   /**
@@ -74,14 +83,20 @@ export class McpHttpClient {
     if (res.error) {
       throw new Error(`tools/list failed: ${JSON.stringify(res.error)}`);
     }
-    const result = res.result as { tools?: Array<{ name: string; description: string; inputSchema: unknown }> };
+    const result = res.result as {
+      tools?: Array<{ name: string; description: string; inputSchema: unknown }>;
+    };
     return result?.tools || [];
   }
 
   /**
    * Calls an MCP tool by name with arguments
    */
-  async callTool(name: string, args: Record<string, unknown> = {}, extraHeaders?: Record<string, string>): Promise<McpToolCallResult> {
+  async callTool(
+    name: string,
+    args: Record<string, unknown> = {},
+    extraHeaders?: Record<string, string>,
+  ): Promise<McpToolCallResult> {
     const res = await this.postJsonRpc(
       'tools/call',
       {
@@ -102,18 +117,27 @@ export class McpHttpClient {
   /**
    * Reads an MCP Resource, including ui://cards/* App cards
    */
-  async readResource(uri: string): Promise<{ contents: Array<{ uri: string; mimeType: string; text?: string; blob?: string }> }> {
+  async readResource(
+    uri: string,
+  ): Promise<{ contents: Array<{ uri: string; mimeType: string; text?: string; blob?: string }> }> {
     const res = await this.postJsonRpc('resources/read', { uri });
     if (res.error) {
       throw new Error(`resources/read failed: ${JSON.stringify(res.error)}`);
     }
-    return (res.result as { contents: Array<{ uri: string; mimeType: string; text?: string; blob?: string }> }) || { contents: [] };
+    return (
+      (res.result as {
+        contents: Array<{ uri: string; mimeType: string; text?: string; blob?: string }>;
+      }) || { contents: [] }
+    );
   }
 
   /**
    * Universal executor for pending confirmation tokens
    */
-  async confirmAction(confirmationToken: string, idempotencyKey?: string): Promise<McpToolCallResult> {
+  async confirmAction(
+    confirmationToken: string,
+    idempotencyKey?: string,
+  ): Promise<McpToolCallResult> {
     return this.callTool('confirm_action', {
       confirmation_token: confirmationToken,
       ...(idempotencyKey ? { idempotency_key: idempotencyKey } : {}),
@@ -139,7 +163,9 @@ export class McpHttpClient {
     extraHeaders?: Record<string, string>,
   ): Promise<{ result?: unknown; error?: unknown; id?: number | string }> {
     if (!this.token) {
-      throw new Error('MCP_CLIENT_UNAUTHENTICATED: Authentication token is required to invoke MCP server');
+      throw new Error(
+        'MCP_CLIENT_UNAUTHENTICATED: Authentication token is required to invoke MCP server',
+      );
     }
 
     if (!this.sessionId && method !== 'initialize') {
@@ -193,4 +219,3 @@ export class McpHttpClient {
     return json;
   }
 }
-

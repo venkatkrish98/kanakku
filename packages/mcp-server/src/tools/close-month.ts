@@ -35,18 +35,24 @@ export const closeMonthSchema = {
     .min(1)
     .max(12)
     .optional()
-    .describe('Month number to close (1-12). Inferred from active session workflow or previous month if omitted.'),
+    .describe(
+      'Month number to close (1-12). Inferred from active session workflow or previous month if omitted.',
+    ),
   year: z
     .number()
     .int()
     .min(2020)
     .max(2040)
     .optional()
-    .describe('Fiscal calendar year (e.g. 2026). Inferred from active session workflow or previous month if omitted.'),
+    .describe(
+      'Fiscal calendar year (e.g. 2026). Inferred from active session workflow or previous month if omitted.',
+    ),
   step: z
     .enum(['scan', 'categorise', 'reconcile', 'prepare_close', 'resume'])
     .optional()
-    .describe('Step in the month-end close workflow. Omit or set to "resume" to auto-detect and advance from the current workflow state.'),
+    .describe(
+      'Step in the month-end close workflow. Omit or set to "resume" to auto-detect and advance from the current workflow state.',
+    ),
   sessionId: z
     .string()
     .optional()
@@ -77,7 +83,12 @@ export async function handleCloseMonth(
   let resolvedYear = args.year;
 
   if (!resolvedMonth || !resolvedYear) {
-    const activeWorkflow = await loadActiveWorkflowState(db, businessId, 'close_month', sessionIdentifier);
+    const activeWorkflow = await loadActiveWorkflowState(
+      db,
+      businessId,
+      'close_month',
+      sessionIdentifier,
+    );
     if (activeWorkflow?.workflowState?.['month'] && activeWorkflow?.workflowState?.['year']) {
       resolvedMonth = Number(activeWorkflow.workflowState['month']);
       resolvedYear = Number(activeWorkflow.workflowState['year']);
@@ -454,7 +465,9 @@ export async function handleCloseMonth(
               .limit(1);
 
             if (!validCat[0]) {
-              throw new Error(`CATEGORY_NOT_FOUND: Expense category "${categoryId}" not found in your business.`);
+              throw new Error(
+                `CATEGORY_NOT_FOUND: Expense category "${categoryId}" not found in your business.`,
+              );
             }
 
             // Verify expense exists and belongs to the requested IST month [startDate, endDate)
@@ -469,7 +482,9 @@ export async function handleCloseMonth(
               .limit(1);
 
             if (!existingExpense) {
-              throw new Error(`EXPENSE_NOT_FOUND: Expense "${expenseId}" was not found in your business.`);
+              throw new Error(
+                `EXPENSE_NOT_FOUND: Expense "${expenseId}" was not found in your business.`,
+              );
             }
 
             if (existingExpense.expenseDate < startDate || existingExpense.expenseDate >= endDate) {
@@ -479,10 +494,7 @@ export async function handleCloseMonth(
             }
 
             // Update category
-            await tx
-              .update(expenses)
-              .set({ categoryId })
-              .where(eq(expenses.id, expenseId));
+            await tx.update(expenses).set({ categoryId }).where(eq(expenses.id, expenseId));
 
             appliedCount++;
 
@@ -526,7 +538,8 @@ export async function handleCloseMonth(
               const expenseDebitLine = lines.find(
                 (l) =>
                   l.debitPaise > 0n &&
-                  (l.accountType === 'expense' || !['1210', '1220', '1230'].includes(l.accountCode)),
+                  (l.accountType === 'expense' ||
+                    !['1210', '1220', '1230'].includes(l.accountCode)),
               );
 
               if (expenseDebitLine) {
@@ -634,7 +647,7 @@ export async function handleCloseMonth(
     // 1. Workflow sequence check: Ensure 'scan' or 'categorise' was executed
     const prevSummary = existingReport[0]?.summaryJson as Record<string, unknown> | undefined;
     const prevStep = prevSummary?.step;
-    if (!prevStep || (!['scan', 'categorise', 'reconcile'].includes(String(prevStep)))) {
+    if (!prevStep || !['scan', 'categorise', 'reconcile'].includes(String(prevStep))) {
       throw new Error(
         'WORKFLOW_SEQUENCE_ERROR: Step "scan" must be executed before "reconcile" in the month-end close workflow.',
       );
@@ -752,7 +765,8 @@ export async function handleCloseMonth(
     )
     .limit(1);
 
-  const latestSummary = (latestReport?.summaryJson ?? prevSummary) as Record<string, unknown> | undefined;
+  const latestSummary = (latestReport?.summaryJson ?? prevSummary) as
+    Record<string, unknown> | undefined;
   if (
     !latestSummary ||
     (latestSummary.step !== 'reconcile' && latestSummary.step !== 'prepare_close') ||

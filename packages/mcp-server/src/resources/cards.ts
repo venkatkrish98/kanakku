@@ -246,9 +246,15 @@ export function renderInvoiceCardHtml(data: InvoiceCardData): string {
     .join('');
 
   const taxRows = [
-    data.cgstFormatted ? `<div><span>CGST:</span> <strong>${escapeHtml(data.cgstFormatted)}</strong></div>` : '',
-    data.sgstFormatted ? `<div><span>SGST:</span> <strong>${escapeHtml(data.sgstFormatted)}</strong></div>` : '',
-    data.igstFormatted ? `<div><span>IGST:</span> <strong>${escapeHtml(data.igstFormatted)}</strong></div>` : '',
+    data.cgstFormatted
+      ? `<div><span>CGST:</span> <strong>${escapeHtml(data.cgstFormatted)}</strong></div>`
+      : '',
+    data.sgstFormatted
+      ? `<div><span>SGST:</span> <strong>${escapeHtml(data.sgstFormatted)}</strong></div>`
+      : '',
+    data.igstFormatted
+      ? `<div><span>IGST:</span> <strong>${escapeHtml(data.igstFormatted)}</strong></div>`
+      : '',
   ]
     .filter(Boolean)
     .join('');

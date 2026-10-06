@@ -2,11 +2,7 @@ import { z } from 'zod';
 import { eq, and, inArray } from 'drizzle-orm';
 import type { KanakkuDatabase } from '@kanakku/db';
 import { invoices, customers } from '@kanakku/db';
-import {
-  calculateAgeingBucket,
-  formatInr,
-  type AgeingBucket,
-} from '@kanakku/core';
+import { calculateAgeingBucket, formatInr, type AgeingBucket } from '@kanakku/core';
 import { getTenantContext } from '../auth/index.js';
 
 export const listOutstandingInvoicesSchema = {
@@ -33,7 +29,9 @@ export async function handleListOutstandingInvoices(
       .limit(1);
 
     if (!cust[0]) {
-      throw new Error(`CUSTOMER_NOT_FOUND: Customer with ID "${args.customer_id}" not found in your business`);
+      throw new Error(
+        `CUSTOMER_NOT_FOUND: Customer with ID "${args.customer_id}" not found in your business`,
+      );
     }
   }
 

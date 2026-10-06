@@ -155,7 +155,14 @@ export function DirectDraftCard({
               }}
             >
               <div>
-                <span style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <span
+                  style={{
+                    fontSize: '0.72rem',
+                    color: '#94a3b8',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}
+                >
                   Billed To
                 </span>
                 <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f8fafc' }}>
@@ -163,17 +170,33 @@ export function DirectDraftCard({
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <span style={{ fontSize: '0.72rem', color: '#38bdf8', fontWeight: 600, textTransform: 'uppercase' }}>
+                <span
+                  style={{
+                    fontSize: '0.72rem',
+                    color: '#38bdf8',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                  }}
+                >
                   Statutory Tax Invoice
                 </span>
                 <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>POS: 33 (Tamil Nadu)</div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '0.85rem' }}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.45rem',
+                fontSize: '0.85rem',
+              }}
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', color: '#e2e8f0' }}>
                 <span>Professional Services (SAC 998311)</span>
-                <span style={{ fontWeight: 600 }}>₹{String(details.subtotalRupees || '50,000')}</span>
+                <span style={{ fontWeight: 600 }}>
+                  ₹{String(details.subtotalRupees || '50,000')}
+                </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
                 <span>CGST @ 9.0%</span>
@@ -195,7 +218,9 @@ export function DirectDraftCard({
                 }}
               >
                 <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Total Invoice Value</span>
-                <span style={{ fontWeight: 800, fontSize: '1.15rem' }}>₹{String(details.totalRupees || '59,000')}</span>
+                <span style={{ fontWeight: 800, fontSize: '1.15rem' }}>
+                  ₹{String(details.totalRupees || '59,000')}
+                </span>
               </div>
             </div>
           </div>
@@ -223,16 +248,32 @@ export function DirectDraftCard({
               }}
             >
               <div>
-                <span style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase' }}>Expense Category</span>
+                <span style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase' }}>
+                  Expense Category
+                </span>
                 <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f8fafc' }}>
                   {String(details.description || 'Business Expense')}
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <span style={{ fontSize: '0.72rem', color: '#38bdf8', fontWeight: 600, textTransform: 'uppercase' }}>
+                <span
+                  style={{
+                    fontSize: '0.72rem',
+                    color: '#38bdf8',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                  }}
+                >
                   Method
                 </span>
-                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#38bdf8', textTransform: 'uppercase' }}>
+                <div
+                  style={{
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    color: '#38bdf8',
+                    textTransform: 'uppercase',
+                  }}
+                >
                   {String(details.paymentMethod || 'UPI')}
                 </div>
               </div>
@@ -248,7 +289,9 @@ export function DirectDraftCard({
               }}
             >
               <span style={{ fontSize: '0.85rem', color: '#cbd5e1' }}>Total Amount</span>
-              <span style={{ fontWeight: 800, fontSize: '1.15rem' }}>₹{String(details.amountRupees || '2,400')}</span>
+              <span style={{ fontWeight: 800, fontSize: '1.15rem' }}>
+                ₹{String(details.amountRupees || '2,400')}
+              </span>
             </div>
           </div>
         )}
@@ -263,13 +306,27 @@ export function DirectDraftCard({
             </div>
             <div>
               <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Channel</span>
-              <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#a855f7', textTransform: 'capitalize' }}>
+              <div
+                style={{
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  color: '#a855f7',
+                  textTransform: 'capitalize',
+                }}
+              >
                 {String(details.channel || 'WhatsApp')}
               </div>
             </div>
             <div>
               <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Tone</span>
-              <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#38bdf8', textTransform: 'capitalize' }}>
+              <div
+                style={{
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  color: '#38bdf8',
+                  textTransform: 'capitalize',
+                }}
+              >
                 {String(details.tone || 'Polite')}
               </div>
             </div>
@@ -286,7 +343,14 @@ export function DirectDraftCard({
             </div>
             <div>
               <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Workflow Status</span>
-              <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#10b981', textTransform: 'capitalize' }}>
+              <div
+                style={{
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  color: '#10b981',
+                  textTransform: 'capitalize',
+                }}
+              >
                 {String(details.status || 'Scanned')}
               </div>
             </div>

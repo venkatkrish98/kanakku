@@ -2,11 +2,7 @@ import { z } from 'zod';
 import { eq, and } from 'drizzle-orm';
 import type { KanakkuDatabase } from '@kanakku/db';
 import { expenseCategories, pendingConfirmations } from '@kanakku/db';
-import {
-  generateConfirmationToken,
-  formatInr,
-  calculateGstTax,
-} from '@kanakku/core';
+import { generateConfirmationToken, formatInr, calculateGstTax } from '@kanakku/core';
 import { getTenantContext } from '../auth/index.js';
 import { assertPeriodOpen } from './confirm-action.js';
 
@@ -30,12 +26,16 @@ export const recordExpenseSchema = {
     .string()
     .regex(/^\d{2}$/, 'State code must be 2 digits')
     .optional()
-    .describe('2-digit Indian GST state code of vendor (e.g. "33" for TN, "29" for KA). If omitted, extracted from vendor_gstin.'),
+    .describe(
+      '2-digit Indian GST state code of vendor (e.g. "33" for TN, "29" for KA). If omitted, extracted from vendor_gstin.',
+    ),
   category_id: z.string().uuid().optional().describe('Optional UUID of the expense category'),
   is_itc_claimed: z
     .boolean()
     .optional()
-    .describe('Whether Input Tax Credit is legally claimable under GST law (false if blocked under Section 17(5))'),
+    .describe(
+      'Whether Input Tax Credit is legally claimable under GST law (false if blocked under Section 17(5))',
+    ),
 };
 
 export async function handleRecordExpense(
@@ -65,12 +65,17 @@ export async function handleRecordExpense(
       })
       .from(expenseCategories)
       .where(
-        and(eq(expenseCategories.id, args.category_id), eq(expenseCategories.businessId, businessId)),
+        and(
+          eq(expenseCategories.id, args.category_id),
+          eq(expenseCategories.businessId, businessId),
+        ),
       )
       .limit(1);
 
     if (!found[0]) {
-      throw new Error(`CATEGORY_NOT_FOUND: Expense category "${args.category_id}" not found in your business`);
+      throw new Error(
+        `CATEGORY_NOT_FOUND: Expense category "${args.category_id}" not found in your business`,
+      );
     }
     category = found[0];
   } else {
@@ -92,9 +97,15 @@ export async function handleRecordExpense(
       return (
         ((desc.includes('cloud') || desc.includes('aws') || desc.includes('server')) &&
           catName.includes('cloud')) ||
-        ((desc.includes('print') || desc.includes('paper') || desc.includes('ink') || desc.includes('supplies')) &&
+        ((desc.includes('print') ||
+          desc.includes('paper') ||
+          desc.includes('ink') ||
+          desc.includes('supplies')) &&
           catName.includes('supplies')) ||
-        ((desc.includes('travel') || desc.includes('cab') || desc.includes('flight') || desc.includes('fuel')) &&
+        ((desc.includes('travel') ||
+          desc.includes('cab') ||
+          desc.includes('flight') ||
+          desc.includes('fuel')) &&
           catName.includes('travel'))
       );
     });
@@ -115,7 +126,11 @@ export async function handleRecordExpense(
   let vendorStateCode = tenant.business.stateCode;
   if (args.vendor_state_code) {
     vendorStateCode = args.vendor_state_code;
-  } else if (args.vendor_gstin && args.vendor_gstin.length >= 2 && /^\d{2}/.test(args.vendor_gstin)) {
+  } else if (
+    args.vendor_gstin &&
+    args.vendor_gstin.length >= 2 &&
+    /^\d{2}/.test(args.vendor_gstin)
+  ) {
     vendorStateCode = args.vendor_gstin.slice(0, 2);
   }
 
@@ -145,7 +160,7 @@ export async function handleRecordExpense(
     );
   }
 
-  const isItcClaimed = categoryEligible ? (args.is_itc_claimed !== false) : false;
+  const isItcClaimed = categoryEligible ? args.is_itc_claimed !== false : false;
 
   const expenseDate = args.date ? new Date(args.date) : new Date();
   await assertPeriodOpen(db, businessId, expenseDate, 'expense');

@@ -7,19 +7,20 @@ import { getTenantContext } from '../auth/index.js';
 
 export const sendReminderSchema = {
   customer_id: z.string().uuid().optional().describe('UUID of the customer'),
-  customer_name: z
-    .string()
-    .optional()
-    .describe('Customer name (used if customer_id not provided)'),
+  customer_name: z.string().optional().describe('Customer name (used if customer_id not provided)'),
   invoice_id: z.string().uuid().optional().describe('Optional specific invoice UUID'),
   tone: z
     .enum(['polite', 'firm'])
     .optional()
-    .describe('Tone of the collection message: "polite" or "firm" (defaults to business memory preference or "polite")'),
+    .describe(
+      'Tone of the collection message: "polite" or "firm" (defaults to business memory preference or "polite")',
+    ),
   channel: z
     .enum(['whatsapp', 'email'])
     .optional()
-    .describe('Communication channel: "whatsapp" or "email" (defaults to business memory preference or "whatsapp")'),
+    .describe(
+      'Communication channel: "whatsapp" or "email" (defaults to business memory preference or "whatsapp")',
+    ),
 };
 
 export async function handleSendPaymentReminder(
@@ -52,7 +53,9 @@ export async function handleSendPaymentReminder(
       .limit(1);
 
     if (!found[0]) {
-      throw new Error(`CUSTOMER_NOT_FOUND: Customer with ID "${args.customer_id}" not found in your business`);
+      throw new Error(
+        `CUSTOMER_NOT_FOUND: Customer with ID "${args.customer_id}" not found in your business`,
+      );
     }
     customer = found[0];
   } else if (args.customer_name) {
@@ -75,7 +78,9 @@ export async function handleSendPaymentReminder(
       .limit(1);
 
     if (!found[0]) {
-      throw new Error(`CUSTOMER_NOT_FOUND: Customer "${args.customer_name}" not found in your business`);
+      throw new Error(
+        `CUSTOMER_NOT_FOUND: Customer "${args.customer_name}" not found in your business`,
+      );
     }
     customer = found[0];
   } else {
@@ -104,10 +109,14 @@ export async function handleSendPaymentReminder(
 
     const inv = foundInvoice[0];
     if (!inv) {
-      throw new Error(`INVOICE_NOT_FOUND: Invoice with ID "${args.invoice_id}" not found in your business`);
+      throw new Error(
+        `INVOICE_NOT_FOUND: Invoice with ID "${args.invoice_id}" not found in your business`,
+      );
     }
     if (inv.customerId !== customer.id) {
-      throw new Error('INVOICE_CUSTOMER_MISMATCH: Invoice does not belong to the specified customer');
+      throw new Error(
+        'INVOICE_CUSTOMER_MISMATCH: Invoice does not belong to the specified customer',
+      );
     }
 
     targetInvoiceId = inv.id;
@@ -132,7 +141,9 @@ export async function handleSendPaymentReminder(
       );
 
     if (openInvoices.length === 0) {
-      throw new Error(`NO_OUTSTANDING_INVOICES: Customer "${customer.name}" has no outstanding invoices`);
+      throw new Error(
+        `NO_OUTSTANDING_INVOICES: Customer "${customer.name}" has no outstanding invoices`,
+      );
     }
 
     targetInvoiceId = openInvoices[0]!.id;
@@ -175,7 +186,8 @@ export async function handleSendPaymentReminder(
 
   // 4. Compose Tone-Appropriate Message Preview
   const formattedAmount = formatInr(amountDuePaise);
-  const contact = selectedChannel === 'whatsapp' ? customer.phone ?? 'N/A' : customer.email ?? 'N/A';
+  const contact =
+    selectedChannel === 'whatsapp' ? (customer.phone ?? 'N/A') : (customer.email ?? 'N/A');
   const recipientName = customer.contactName ?? customer.name;
 
   let messagePreview = '';
@@ -237,7 +249,8 @@ export async function handleSendPaymentReminder(
             preview_summary: humanSummary,
             expires_at: token.expiresAt.toISOString(),
             status: 'pending_confirmation',
-            delivery_mode: 'simulated (records sent_demo on confirm; live messaging integration scheduled for later phase)',
+            delivery_mode:
+              'simulated (records sent_demo on confirm; live messaging integration scheduled for later phase)',
             integration_status: 'demo_simulation',
           },
           null,
