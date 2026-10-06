@@ -20,8 +20,7 @@ This document contains authentic, empirical developer feedback and friction logg
   - TypeScript types for complex resource URI templates can become loose when matching multi-segment paths.
 
 - **Onboarding experience from zero to hello world**:  
-  - Setting up a basic stdio server took under 15 minutes.
-  - Initial setup to first working tool call took approximately 35 minutes: 15 minutes to declare Zod tool schemas and business handlers, and 20 minutes to configure Express route streaming with spec-compliant headers (`content-type: text/event-stream; charset=utf-8` and `mcp-session-id`). Once initialized, the JSON-RPC execution cycle was immediate and deterministic.
+  - Initial setup to first working tool call took approximately 35 minutes: 15 minutes to declare Zod tool schemas and business handlers, and 20 minutes to configure native Node.js HTTP server streaming (`node:http` `createServer`) with spec-compliant headers (`content-type: text/event-stream; charset=utf-8` and `mcp-session-id`). Once initialized, the JSON-RPC execution cycle was immediate and deterministic.
 
 - **Whether we would build with it again and why**:  
   - **Yes, absolutely.** MCP is rapidly becoming the universal standard for AI tool execution. Its separation of tool definitions, typed schemas, and resource URIs eliminates ad-hoc function-calling formats across LLM providers.
@@ -88,7 +87,7 @@ This document contains authentic, empirical developer feedback and friction logg
   - Simple zero-to-hello-world setup: created a log group and sent structured JSON events within 10 lines of code.
 
 - **Whether we would build with it again and why**:  
-  - **Yes.** CloudWatch Logs provides a durable, serverless, write-once operational audit sink without the operational overhead of running dedicated ledger databases.
+  - **Yes.** CloudWatch Logs provides a durable, serverless, append-only operational audit sink with a 365-day retention lifecycle without the operational overhead of running dedicated log servers.
 
 ---
 
@@ -218,3 +217,25 @@ This document contains authentic, empirical developer feedback and friction logg
 
 - **Whether we would build with it again and why**:  
   - **Yes.** Centralized, encrypted secrets storage with IAM role-based access is non-negotiable for enterprise database security.
+
+---
+
+## 11. Zod Runtime Schema Validation (`zod`)
+
+- **What we used it for**:  
+  Strict runtime schema validation for financial tool parameters, confirmation token payloads, invoice/expense inputs, and type-safe parameter definitions across all 13 canonical MCP tools.
+
+- **What worked well**:  
+  - First-class TypeScript type inference (`z.infer<typeof schema>`) guaranteed complete synchronization between runtime validation and static compile checks.
+  - Direct integration with `@modelcontextprotocol/sdk` tool definitions, enabling declarative JSON Schema generation for LLM tool invocation.
+  - `safeParse` provided deterministic, non-throwing validation pipelines for voice intent inputs.
+
+- **What needs improvement**:  
+  - Handling integer paise BigInt values required custom string transformations (`z.string().regex(/^\d+$/).transform(BigInt)`) rather than a native `z.bigint()` coercion in older tool inputs.
+  - Error messages for deeply nested line-item arrays can produce verbose issue arrays that require custom formatting before returning to conversational voice agents.
+
+- **Onboarding experience from zero to hello world**:  
+  - Under 5 minutes: declaring basic object schemas and parsing JSON objects was immediately intuitive.
+
+- **Whether we would build with it again and why**:  
+  - **Yes, unconditionally.** Zod is the essential gatekeeper preventing invalid, malformed, or hostile LLM tool arguments from reaching core accounting ledger logic.

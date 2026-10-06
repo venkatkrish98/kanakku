@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary & Production Topology
 
-Kanakku is deployed on **Amazon Web Services (AWS)** using a serverless container architecture tailored for multi-tenant Indian SMB accounting workloads. The infrastructure combines **AWS App Runner** for managed container orchestration, **Amazon RDS for PostgreSQL 16** for ACID-compliant double-entry ledger persistence, **AWS Secrets Manager** for credential security, **Amazon Bedrock** for intelligent conversational intent parsing, and **Amazon CloudWatch Logs** for external tamper-evident audit anchoring.
+Kanakku is designed and architected for deployment on **Amazon Web Services (AWS)** using a serverless container architecture tailored for multi-tenant Indian SMB accounting workloads. This guide provides the complete declarative infrastructure blueprint and operational runbook. The architecture combines **AWS App Runner** for managed container orchestration, **Amazon RDS for PostgreSQL 16** for ACID-compliant double-entry ledger persistence, **AWS Secrets Manager** for credential security, **Amazon Bedrock** for intelligent conversational intent parsing, and **Amazon CloudWatch Logs** for external tamper-evident audit anchoring.
 
 ```
                               Internet / Browser

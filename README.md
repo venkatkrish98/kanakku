@@ -112,7 +112,7 @@ Per official Devpost guidance and FAQs, developer tooling for unreleased native 
 - **Amazon Bedrock Converse API**: Orchestrates conversational multi-turn sessions using Anthropic Claude 3.5 Sonnet (`anthropic.claude-3-5-sonnet-20241022-v2:0`) with low-latency streaming and AWS enterprise security boundaries.
 - **Amazon RDS for PostgreSQL 16**: Multi-AZ relational database providing ACID transaction guarantees, integer paise financial fields, and row-level locking (`FOR UPDATE SKIP LOCKED`) for background job workers.
 - **AWS Secrets Manager**: Stores and rotates runtime database credentials (`DATABASE_URL`), RDS master administrative credentials, and cryptographic audit signing keys (`AUDIT_ANCHOR_SECRET`).
-- **Amazon CloudWatch Logs**: Immutable append-only operational sink receiving HMAC-SHA256 signed audit head hashes upon month close.
+- **Amazon CloudWatch Logs**: Append-only operational audit sink receiving HMAC-SHA256 signed audit head hashes upon month close with 365-day retention.
 - **Terraform**: 100% declarative Infrastructure-as-Code in [`infra/terraform`](infra/terraform).
 
 ---
@@ -126,7 +126,7 @@ Per official Devpost guidance and FAQs, developer tooling for unreleased native 
 | **LLM Orchestration** | **Amazon Bedrock Converse API** | Intent classification and multi-turn conversational synthesis using Anthropic Claude 3.5 Sonnet. |
 | **Container Compute** | **AWS App Runner** | Serverless container execution for MCP server and console web app. |
 | **Database** | **Amazon RDS PostgreSQL 16** | Relational double-entry ledger, transaction outbox, and period locks. |
-| **Audit Immutability** | **Amazon CloudWatch Logs** | Append-only external anchoring for cryptographic hash chain heads. |
+| **Operational Audit Sink** | **Amazon CloudWatch Logs** | Append-only external anchoring for cryptographic hash chain heads (365-day retention). |
 | **Secrets & Keys** | **AWS Secrets Manager** | Dynamic injection of runtime connection strings and signing keys. |
 | **Infrastructure as Code**| **Terraform (AWS Provider)** | Automated, reproducible cloud provisioning across VPC, RDS, and App Runner. |
 | **Database ORM** | **Drizzle ORM** | Type-safe SQL schema, automated migrations, and integer paise BigInt mapping. |

@@ -50,7 +50,7 @@
   - Operator presses Push-to-Talk. The audio waveform pulses smoothly.
   - Spoken Input: *"Issue an invoice to Apex Labs for 50,000 rupees plus 18% GST, due in 15 days."*
   - On-screen: Bedrock Converse parses intent and streams the `create_invoice` tool call to our self-hosted Streamable HTTP MCP server.
-  - An interactive **MCP App Card (`ui://invoice/draft`)** renders seamlessly inside the session showing the customer name, HSN code, CGST (₹4,500), SGST (₹4,500), and total ₹59,000.
+  - An interactive **MCP App Card (`ui://cards/invoice-draft`)** renders seamlessly inside the session showing the customer name, HSN code, CGST (₹4,500), SGST (₹4,500), and total ₹59,000.
   - Operator clicks **Approve & Issue** (or says *"Confirm"*).
   - The single-use confirmation token is consumed; journal entries post immediately.
 - **Voiceover**:  
@@ -71,7 +71,7 @@
   - Quick view of AWS Architecture: App Runner, RDS PostgreSQL 16 Multi-AZ, Secrets Manager, Bedrock Converse.
 - **Voiceover**:  
   *"Kanakku doesn't stop at invoicing. It manages full month-end closures with an automated state machine. Once a month is closed, Kanakku locks the ledger: backdated postings are strictly rejected.  
-  To guarantee non-repudiation, the head of our serialized cryptographic hash chain is anchored to Amazon CloudWatch Logs using a durable PostgreSQL transactional outbox.  
+  To provide external tamper-evidence, the head of our serialized cryptographic hash chain is anchored to Amazon CloudWatch Logs using a durable PostgreSQL transactional outbox.  
   The entire platform is architected and packaged for production on AWS: declarative Terraform infrastructure for AWS App Runner, private VPC egress to Amazon RDS PostgreSQL 16, and AWS Secrets Manager."*
 
 ---
