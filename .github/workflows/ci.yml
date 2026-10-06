@@ -10,6 +10,20 @@ jobs:
   validate:
     name: Lint, Typecheck, Test & Build
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: kanakku_user
+          POSTGRES_PASSWORD: kanakku_dev_password
+          POSTGRES_DB: kanakku_db
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -38,5 +52,14 @@ jobs:
       - name: Run typecheck
         run: pnpm typecheck
 
-      - name: Run unit tests
+      - name: Run database migrations and seed
+        run: |
+          pnpm db:migrate
+          pnpm seed
+        env:
+          DATABASE_URL: postgresql://kanakku_user:kanakku_dev_password@localhost:5433/kanakku_db
+
+      - name: Run unit and integration tests
         run: pnpm test
+        env:
+          DATABASE_URL: postgresql://kanakku_user:kanakku_dev_password@localhost:5433/kanakku_db
