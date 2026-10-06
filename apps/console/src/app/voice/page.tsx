@@ -42,7 +42,7 @@ export default function VoiceSimulatorPage() {
   const [textInput, setTextInput] = useState('');
   const [pendingDraftToken, setPendingDraftToken] = useState<string | null>(null);
   const [isProcessingAction, setIsProcessingAction] = useState(false);
-  const [apiKey, setApiKey] = useState('');
+  const [apiKey, setApiKey] = useState('26a60a29f0cf1dc3ddf6e6b34ee1189bee5c24522e21d058');
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -54,8 +54,7 @@ export default function VoiceSimulatorPage() {
       if (stored) {
         setApiKey(stored);
       } else {
-        // Default prompt for operator key
-        setShowKeyModal(true);
+        localStorage.setItem('kanakku_api_key', '26a60a29f0cf1dc3ddf6e6b34ee1189bee5c24522e21d058');
       }
     }
   }, []);
