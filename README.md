@@ -26,7 +26,15 @@ Kanakku bridges conversational simplicity with institutional financial rigor:
 
 ---
 
-## 2. Track & Required Tool: Model Context Protocol (MCP)
+## 2. Demo Video & Walkthrough
+
+A complete high-definition walkthrough of Kanakku's voice copilot, self-hosted Model Context Protocol server, and double-entry ledger in action is available:
+- **Demo Video (MP4):** [`docs/kanakku_demo_video.mp4`](docs/kanakku_demo_video.mp4)
+- **Pitch Script & Shot List (2m 48s):** [`docs/pitch-video-script.md`](docs/pitch-video-script.md)
+
+---
+
+## 3. Track & Required Tool: Model Context Protocol (MCP)
 
 Kanakku is built from the ground up on the **Model Context Protocol (MCP)**, the foundational standard for the **Alexa+ Track**:
 
@@ -78,7 +86,7 @@ Per official Devpost guidance and FAQs, developer tooling for unreleased native 
 
 ---
 
-## 3. AWS Cloud Architecture (AWS Builder Mini Challenge)
+## 4. AWS Cloud Architecture (AWS Builder Mini Challenge)
 
 ```
                        ┌──────────────────────────────────────────────┐
@@ -117,7 +125,7 @@ Per official Devpost guidance and FAQs, developer tooling for unreleased native 
 
 ---
 
-## 4. Built With
+## 5. Built With
 
 | Layer / Component | Technology / Product | Specific Role in Kanakku |
 | :--- | :--- | :--- |
@@ -136,7 +144,7 @@ Per official Devpost guidance and FAQs, developer tooling for unreleased native 
 
 ---
 
-## 5. Local Quickstart & Verification
+## 6. Local Quickstart & Verification
 
 ### Prerequisites
 - Node.js 22+
@@ -197,7 +205,7 @@ curl -X POST http://localhost:3001/mcp \
 
 ---
 
-## 6. Testing & Quality Assurance
+## 7. Testing & Quality Assurance
 
 Kanakku includes a comprehensive automated test suite covering all accounting invariants, MCP Streamable HTTP protocols, AppBridge cards, and audit anchoring:
 
@@ -216,9 +224,10 @@ pnpm typecheck
 
 ---
 
-## 7. Submission Artifacts
+## 8. Submission Artifacts
 
 - **Devpost Project Name**: Kanakku (கணக்கு) — Voice-First AI Bookkeeper for Indian MSMEs
+- **Demo Walkthrough Video (MP4)**: [`docs/kanakku_demo_video.mp4`](docs/kanakku_demo_video.mp4)
 - **Pitch Video Script & Shot List (2m 48s)**: [`docs/pitch-video-script.md`](docs/pitch-video-script.md)
 - **Developer & Platform Feedback**: [`FEEDBACK.md`](FEEDBACK.md)
 - **Friction Log**: [`FRICTION_LOG.md`](FRICTION_LOG.md)
@@ -227,7 +236,7 @@ pnpm typecheck
 
 ---
 
-## 8. License
+## 9. License
 
 This project is licensed under the MIT License — see the [`LICENSE`](LICENSE) file for details.
 
