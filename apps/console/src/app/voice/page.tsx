@@ -455,7 +455,7 @@ export default function VoiceSimulatorPage() {
           maxWidth: '860px',
           width: '100%',
           margin: '0 auto',
-          padding: '1.5rem 1.5rem 10rem 1.5rem',
+          padding: '1.5rem 1.5rem 18rem 1.5rem',
           display: 'flex',
           flexDirection: 'column',
           gap: '1.25rem',
